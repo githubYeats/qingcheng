@@ -13,9 +13,6 @@ public class Spec implements Serializable{
 	@Id
 	private Integer id;//ID
 
-
-	
-
 	private String name;//名称
 
 	private String options;//规格选项

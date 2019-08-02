@@ -13,16 +13,12 @@ public class Template implements Serializable{
 	@Id
 	private Integer id;//ID
 
-
-	
-
 	private String name;//模板名称
 
 	private Integer specNum;//规格数量
 
 	private Integer paraNum;//参数数量
 
-	
 	public Integer getId() {
 		return id;
 	}
