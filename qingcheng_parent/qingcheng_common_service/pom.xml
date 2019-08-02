@@ -2,6 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+    【服务公共模块】
+        专门为服务层提供公共服务的模块
+            服务层，即指qingcheng_service_*工程。<==它包括了dao层与service层
+
+    说明：服务层：包括dao层与service层。
+        Dubbo架构中，dao层与service层共同提供服务，作为"服务提供者"。
+
+    -->
+
+    <!--#######################################################################-->
+
+    <!--父工程信息-->
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
@@ -9,14 +23,30 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <!--项目名称-->
     <artifactId>qingcheng_common_service</artifactId>
 
+    <!--依赖 begin-->
     <dependencies>
+        <!--依赖模块-->
         <dependency>
             <groupId>com.qingcheng</groupId>
             <artifactId>qingcheng_common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- MySql -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!-- 连接池 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+        </dependency>
+
         <!-- Mybatis -->
         <dependency>
             <groupId>org.mybatis</groupId>
@@ -30,26 +60,57 @@
             <groupId>com.github.miemiedev</groupId>
             <artifactId>mybatis-paginator</artifactId>
         </dependency>
-        <!-- MySql -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <!-- 连接池 -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-        </dependency>
+
         <!--通用Mapper-->
         <dependency>
             <groupId>tk.mybatis</groupId>
             <artifactId>mapper</artifactId>
             <version>4.1.4</version>
         </dependency>
+
+        <!-- Redis缓存 -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <!--分页插件-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+        </dependency>
+
+        <!--文件上传-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
     </dependencies>
+    <!--依赖 begin-->
+
+    <!--项目构建  begin-->
+    <build>
+        <plugins>
+            <!--Tomcat插件-->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <port>9001</port><!-- 指定端口 -->
+                    <path>/</path><!-- 请求路径 -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <!--项目构建  end-->
 
 </project>

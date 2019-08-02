@@ -2,6 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!--
+   【接口模块】
+       专门存放servicen层需要定义的各个接口。
+       不包括dao层的接口（mybatis框架下，dao层只有Mapper接口）
+   -->
+
+    <!--#############################################################-->
+
+    <!--父工程信息-->
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
@@ -9,17 +18,27 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <!--项目名称-->
     <artifactId>qingcheng_interface</artifactId>
+
+    <!--依赖  begin-->
     <dependencies>
+        <!--依赖模块-->
         <dependency>
             <groupId>com.qingcheng</groupId>
             <artifactId>qingcheng_pojo</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--分页助手
+            interface模块中要放pagehelper，是为什么功能服务的？？？？？？？？？
+        -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper</artifactId>
         </dependency>
     </dependencies>
+    <!--依赖  end-->
+
 
 </project>

@@ -2,6 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+    服务消费者
+
+    【web层的后台管理模块】==>web层有很多模块，后台管理模块只是其中之一。
+        在这里，其实就是用于定义Controller。
+
+        该模块要直接依赖于两个模块：
+            1. web层公共服务模块   qingcheng_common_web
+            2. 接口模块            qingcheng_interface
+
+    这是Web项目，要打成war包！
+    -->
+    <!--################################################################-->
+
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
@@ -11,6 +26,7 @@
     <packaging>war</packaging>
     <artifactId>qingcheng_web_manager</artifactId>
 
+    <!--依赖  begin-->
     <dependencies>
         <dependency>
             <groupId>com.qingcheng</groupId>
@@ -23,19 +39,24 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+    <!--依赖  end-->
 
+
+    <!--项目构建  begin-->
     <build>
         <plugins>
+            <!--Tomcat插件-->
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
-                    <!-- 指定端口 -->
-                    <port>9101</port>
-                    <!-- 请求路径 -->
-                    <path>/</path>
+                    <port>9101</port><!-- 指定端口 -->
+                    <path>/</path> <!-- 请求路径 -->
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <!--项目构建  end-->
+
 </project>

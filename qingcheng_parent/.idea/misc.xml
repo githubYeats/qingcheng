@@ -9,6 +9,9 @@
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_user" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_web_manager" />
   </component>
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

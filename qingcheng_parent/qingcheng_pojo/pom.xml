@@ -2,6 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+    【实体层模块】
+        存放JavaBean，建议：
+            com.qingcheng.pojo包      存放与数据库对应的
+            com.qingcheng.entity包    存放自定义的JavaBean
+    -->
+
+    <!--############################################################-->
+
+    <!--父工程信息-->
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
@@ -9,9 +20,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <!--项目名-->
     <artifactId>qingcheng_pojo</artifactId>
 
+    <!--依赖  begin-->
     <dependencies>
+        <!--JPA依赖：映射实体类与数据库表-->
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>persistence-api</artifactId>
@@ -19,5 +33,7 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
+    <!--依赖  end-->
+
 
 </project>

@@ -2,6 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+    【顶层公共模块】
+        作用：为其他所有模块提供服务
+            功能是其他所有模块可以共享的！
+            “可以”，不代表默认就被共享了，谁要用，谁就要配置服务（导入该顶层公共服务模块）
+    -->
+
+    <!--#############################################################################-->
+
+    <!--父工程信息-->
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
@@ -9,9 +20,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <!--项目名称-->
     <artifactId>qingcheng_common</artifactId>
-    <!--公共模块-->
+
+    <!--依赖  begin-->
     <dependencies>
+        <!--Junit-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -35,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
+            <artifactId>spring-aspects</artifactId><!--传递依赖：aspectjweaver-->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -49,6 +68,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
+
         <!-- dubbo相关 -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -62,14 +82,13 @@
             <groupId>com.github.sgroschupf</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
+
+        <!--fastjson-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+
         <dependency>
             <groupId>javassist</groupId>
             <artifactId>javassist</artifactId>
@@ -80,4 +99,6 @@
         </dependency>
 
     </dependencies>
+    <!--依赖  end-->
+
 </project>

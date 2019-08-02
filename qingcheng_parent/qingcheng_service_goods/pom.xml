@@ -2,16 +2,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+    【服务层的商品模块】==>服务层会有很多模块，商品模块只是其实之一。
+        它要"直接依赖于"两个模块：
+            1. 接口模块           qingcheng_interface
+            2. 公共服务模块       qingcheng_common_service
+            将两个模块作为依赖导入到该模块中来
+
+    这是Web项目了，要打成war包！
+    -->
+    <!--##################################################################-->
+
+    <!--父工程信息-->
     <parent>
         <artifactId>qingcheng_parent</artifactId>
         <groupId>com.qingcheng</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
+    <!--web项目-->
     <packaging>war</packaging>
+
+    <!--项目名-->
     <artifactId>qingcheng_service_goods</artifactId>
 
+    <!--依赖  begin-->
     <dependencies>
+        <!--依赖模块-->
         <dependency>
             <groupId>com.qingcheng</groupId>
             <artifactId>qingcheng_interface</artifactId>
@@ -23,20 +42,22 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+    <!--依赖  end-->
 
+    <!--项目构建  begin-->
     <build>
         <plugins>
+            <!--Tomcat插件-->
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
-                    <!-- 指定端口 -->
-                    <port>9001</port>
-                    <!-- 请求路径 -->
-                    <path>/</path>
+                    <port>9001</port><!-- 指定端口 -->
+                    <path>/</path><!-- 请求路径 -->
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
+    <!--项目构建  end-->
 </project>
