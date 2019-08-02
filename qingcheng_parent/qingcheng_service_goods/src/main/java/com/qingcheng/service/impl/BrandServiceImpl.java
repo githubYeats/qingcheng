@@ -12,10 +12,10 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service //Dubbo注解，不能导成了Spring原生的@Service注解
 public class BrandServiceImpl implements BrandService {
 
-    @Autowired
+    @Autowired //Spring注解，按类型注入Bean对象
     private BrandMapper brandMapper;
 
     /**
@@ -23,6 +23,7 @@ public class BrandServiceImpl implements BrandService {
      * @return
      */
     public List<Brand> findAll() {
+        //int a =1/0;//制造异常，测试统一异常处理类
         return brandMapper.selectAll();
     }
 
@@ -38,21 +39,36 @@ public class BrandServiceImpl implements BrandService {
         return new PageResult<Brand>(brands.getTotal(),brands.getResult());
     }
 
+    /*// 直接使用PageHelper做分页查询也可以
+    @Override
+    public PageInfo<Brand> findPage(Integer page, Integer size) {
+        //单纯分页查询
+        PageHelper.startPage(page, size);
+        List<Brand> brandList = brandMapper.selectAll();
+        return new PageInfo<Brand>(brandList);
+    }*/
+
     /**
-     * 条件查询
-     * @param searchMap 查询条件
+     * 品牌条件查询（不加分页效果）
+     *
+     * @param searchMap 查询条件，Brand对象中的属性
      * @return
      */
+    @Override
     public List<Brand> findList(Map<String, Object> searchMap) {
+        // 生成查询条件的Example对象
         Example example = createExample(searchMap);
-        return brandMapper.selectByExample(example);
+        // 查询，并返回
+        List<Brand> brandList = brandMapper.selectByExample(example);
+        return brandList;
     }
 
     /**
-     * 分页+条件查询
-     * @param searchMap
-     * @param page
-     * @param size
+     * 品牌条件查询 + 分页展示
+     *
+     * @param searchMap 查询条件
+     * @param page      当前页码
+     * @param size      每页显示条数
      * @return
      */
     public PageResult<Brand> findPage(Map<String, Object> searchMap, int page, int size) {
@@ -72,37 +88,60 @@ public class BrandServiceImpl implements BrandService {
     }
 
     /**
-     * 新增
+     * 新增品牌
+     *
      * @param brand
      */
+    @Override
     public void add(Brand brand) {
         brandMapper.insert(brand);
     }
 
     /**
-     * 修改
+     * 品牌修改
      * @param brand
-     */
-    public void update(Brand brand) {
-        brandMapper.updateByPrimaryKeySelective(brand);
-    }
-
-    /**
-     *  删除
-     * @param id
-     */
-    public void delete(Integer id) {
-        brandMapper.deleteByPrimaryKey(id);
-    }
-
-    /**
-     * 构建查询条件
-     * @param searchMap
      * @return
      */
+    @Override
+    public int update(Brand brand) {
+        int i = brandMapper.updateByPrimaryKeySelective(brand);
+        return i;
+    }
+
+    /**
+     * 根据id删除品牌
+     *
+     * @param id
+     * @return 执行成功，返回1；否则返回0
+     */
+    @Override
+    public int delete(Integer id) {
+        int i = brandMapper.deleteByPrimaryKey(id);
+        return i;
+    }
+
+    /**
+     * 构造查询条件
+     *
+     * @param searchMap 前端输入的查询条件，封装成Map对象
+     * @return 通用Mapper体系下，封装后的查询条件
+     */
     private Example createExample(Map<String, Object> searchMap){
+        // 定义查询对象
+        /*
+        public Example(Class<?> entityClass) {
+            this(entityClass, true);
+        }
+         */
         Example example=new Example(Brand.class);
+
+        // 创建条件构造器，并进行条件构造
+        /*
+        criteria：(评判或作决定的)标准，准则，原则
+         */
         Example.Criteria criteria = example.createCriteria();
+
+        //条件构建
         if(searchMap!=null){
             // 品牌名称
             if(searchMap.get("name")!=null && !"".equals(searchMap.get("name"))){

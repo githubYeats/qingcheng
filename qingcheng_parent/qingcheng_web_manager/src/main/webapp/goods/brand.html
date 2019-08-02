@@ -45,7 +45,6 @@
             height: 70px;
             display: block;
         }
-
     </style>
 </head>
 <body class="hold-transition">
@@ -65,7 +64,7 @@
     <div class="app-container">
         <div class="box">
             <div class="filter-container">
-                <!--==========================查询条件表单==============================-->
+                <!--================================查询条件项  begin===================================-->
                 <el-form :inline="true">
                     <el-form-item label="品牌名称">
                         <el-input v-model="searchMap.name" placeholder="品牌名称" class="filter-item"></el-input>
@@ -75,26 +74,50 @@
                         <el-input v-model="searchMap.letter" placeholder="品牌的首字母" class="filter-item"></el-input>
                     </el-form-item>
 
-                    <el-button class="dalfBut" @click="fetchData()">查询</el-button>
-                    <el-button type="primary" class="butT" @click="formVisible=true;pojo={}">新增</el-button>
+                    <el-button class="dalfBut" @click="fetchData()">查询</el-button><!--主要按钮，背景呈蓝色-->
+
+                    <!--新增品牌用
+                        dialogVisible = true    弹窗显示
+                    -->
+                    <el-button type="primary" class="butT" @click="dialogVisible=true;pojo={}">新增</el-button>
                 </el-form>
+                <!--================================查询条件项  begin===================================-->
             </div>
 
+            <!--=============================ElementUI方式展示数据  begin==================================-->
             <el-table :data="tableData" border style="width: 100%">
-                <el-table-column prop="id" label="品牌id" width="80"></el-table-column>
-                <el-table-column prop="name" label="品牌名称" width="80"></el-table-column>
-                <el-table-column prop="image" label="品牌图片地址" width="80"></el-table-column>
-                <el-table-column prop="letter" label="品牌的首字母" width="80"></el-table-column>
-                <el-table-column prop="seq" label="排序" width="80"></el-table-column>
+                <el-table-column prop="id" label="品牌ID" width="180" align="center"></el-table-column>
 
-                <el-table-column
-                        label="操作">
+                <el-table-column prop="name" label="品牌名称" width="180" align="center"></el-table-column>
+
+                <el-table-column prop="image" label="品牌图片" align="center">
+                    <!--模板列：作用域插槽-->
+                    <template slot-scope="scope"><!--"slot-scope"名称可以自己取-->
+                        <img width="60px" height="30px" :src="scope.row.image"/><!--src前面的冒号不能丢-->
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="letter" label="品牌的首字母" width="180" align="center"></el-table-column>
+
+                <el-table-column prop="seq" label="排序" width="180" align="center"></el-table-column>
+
+                <el-table-column label="操作" width="180" align="center">
+                    <!--Vue的插槽-->
                     <template slot-scope="scope">
-                        <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
-                        <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
+                        <!--
+                            scope.row.id    获取当前表格单元格所在记录的id号
+                        -->
+                        <!--修改品牌按钮-->
+                        <el-button @click="revise(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
+
+                        <!--删除函数，不要取名delete()-->
+                        <el-button @click="del(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
+            <!--=============================ElementUI方式展示数据  end==================================-->
+
+            <!--========================分页展示  begin===========================-->
             <div class="pagination-container">
                 <el-pagination
                         class="pagiantion"
@@ -102,30 +125,42 @@
                         @current-change="fetchData"
                         :current-page.sync="currentPage"
                         :page-sizes="[10, 20, 30, 40]"
-                        :page-size="size"
+                        :page-size.sync="pageSize"
                         layout="total, sizes, prev, pager, next, jumper"
                         :total="total">
                 </el-pagination>
             </div>
+            <!--========================分页展示  end===========================-->
+
+
             <div class="add-form">
-                <!--弹出窗口-->
-                <el-dialog title="编辑" :visible.sync="formVisible">
+                <!--=======================【弹窗】新增品牌/修改品牌共用  begin=======================-->
+                <el-dialog title="编辑" :visible.sync="dialogVisible">
+                    <!--嵌套表单
+                        inline="true"时，所有表单项将会在界面上排成一行（一行不够，自动换行）
+                        此处希望它一项一行。
+                    -->
+                    <!--<el-form :inline="true">-->
                     <el-form label-width="80px">
                         <el-form-item label="品牌名称">
+                            <!--<el-input placehodler="品牌名称" v-model="searchMap.name"></el-input>-->
                             <el-input v-model="pojo.name"></el-input>
                         </el-form-item>
-                        <el-form-item label="品牌图片地址">
-                            <el-input v-model="pojo.image"></el-input>
-                        </el-form-item>
-                        <el-form-item label="品牌的首字母">
+
+                        <el-form-item label="品牌首字母">
                             <el-input v-model="pojo.letter"></el-input>
                         </el-form-item>
-                        <el-form-item label="排序">
-                            <el-input v-model="pojo.seq"></el-input>
-                        </el-form-item>
 
-                        <!-- 图片上传代码 如页面有图片上传功能放开注释 ****
-                        <el-form-item label="图片">
+                        <el-form-item label="品牌图片">
+                            <!--<el-input placehodler="品牌图片" v-model="pojo.image"></el-input>-->
+
+                            <!--图片上传
+                                action: 后台处理器的请求路径
+                                before-upload: 图片上传前的钩子函数，对图片各样式是否符合要求进行判断
+                                on-success：图片上传成功后的钩子函数，处理上传成功后要做的事
+                                imageUrl: 图片url变量。
+                                          只有上传成功后，imageUrl才会有值，有值，v-if才会为true，图片显示。
+                            -->
                             <el-upload
                                     class="avatar-uploader"
                                     action="/upload/native.do"
@@ -136,81 +171,110 @@
                                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                             </el-upload>
                         </el-form-item>
-                        -->
+
+                        <el-form-item label="品牌排序">
+                            <el-input v-model="pojo.seq"></el-input>
+                        </el-form-item>
 
                         <el-form-item>
                             <el-button type="primary" @click="save()">保存</el-button>
-                            <el-button @click="formVisible = false">关闭</el-button>
+                            <el-button @click="dialogVisible = false">关闭</el-button>
                         </el-form-item>
                     </el-form>
                 </el-dialog>
+                <!--=======================【弹窗】新增品牌/修改品牌共用  end=======================-->
             </div>
-
         </div>
     </div>
-
-
 </div>
+
 </body>
-<script src="/js/vue.js"></script>
-<script src="/js/axios.js"></script>
-<script src="/js/elementui.js"></script>
 <script>
+    // 创建Vue对象
     new Vue({
         el: '#app',
         data() {
             return {
-                tableData: [],
-                currentPage: 1,
-                total: 10,
-                size: 10,
-                searchMap: {},
-                pojo: {},
-                formVisible: false,
-                imageUrl: ''
+                tableData: [], //js对象数组
+                currentPage: 1, //当前页
+                pageSize: 10, //每页显示记录数，临时赋值
+                total: 100, //总记录数，临时赋值
+                searchMap: {},//条件查询
+                dialogVisible: false, // 新增品牌。默认情况下，“新增”按钮不显示
+                pojo: {}, // 新增品牌，表单输入数据封装后的pojo对象
+                imageUrl: '' //图片上传功能，图片url
             }
         },
-        created() {
-            this.fetchData();
+        created() { // hook函数，Vue对象生命周期方法：创建Vue实例后
+            /*axios.get('/brand/findAll.do').then(resp => {//Vue发送ajax请求，回调函数
+                alert(JSON.stringify(resp));//测试用
+                this.tableData = resp.data;
+            });*/
+            this.fetchData();//替代上面的请求，获取数据，刷新列表
         },
         methods: {
-            fetchData() {
-                axios.post(`/brand/findPage.do?page=${this.currentPage}&size=${this.size}`, this.searchMap).then(response => {
-                    this.tableData = response.data.rows;
-                    this.total = response.data.total;
+            fetchData() {//这是函数在ES6中的写法。 ES5的写法是   fetchData():function({});
+                axios.post(`/brand/findPage.do?page=${this.currentPage}&size=${this.pageSize}`, this.searchMap).then(resp => {
+                    //alert(resp);
+                    this.tableData = resp.data.rows;//后台PageResult实体中的属性：private List<T> rows;//分页查询结果
+                    this.total = resp.data.total;
                 });
             },
-            save() {
-                // this.pojo.image= this.imageUrl; //如页面有图片上传功能放开注释
-                axios.post(`/brand/${this.pojo.id == null ? 'add' : 'update'}.do`, this.pojo).then(response => {
-                    this.fetchData(); //刷新列表
-                    this.formVisible = false;//关闭窗口
+            /*save() {// 保存新增的品牌信息
+                axios.post(`/brand/add.do`, this.pojo).then(resp => {
+                    // 保存数据后，刷新列表
+                    this.fetchData();
+                    // 关闭弹窗
+                    this.dialogVisible = false;
+                });
+            },*/
+            save() {// 保存新增的品牌信息
+                //图片上传后，保存
+                this.pojo.image = this.imageUrl;
+
+                /*
+                新增品牌与修改品牌共用一个弹窗窗口，新增与修改都需要保存，得判断，请求哪个处理器。
+                brand对象的id为null时，说明没有id，也就说明是新增记录。
+                 */
+                axios.post(`/brand/${this.pojo.id == null ? 'add' : 'update'}.do`, this.pojo).then(resp => {
+                    // 保存数据后，刷新列表
+                    this.fetchData();
+                    // 关闭弹窗
+                    this.dialogVisible = false;
                 });
             },
-            edit(id) {
-                this.formVisible = true; // 打开窗口
-                // 调用查询
-                axios.get(`/brand/findById.do?id=${id}`).then(response => {
-                    this.pojo = response.data;
-                    // this.imageUrl=this.pojo.image //显示图片  如页面有图片上传功能放开注释
+            revise(id) {//修改品牌
+                this.dialogVisible = true;// 打开弹窗
+                // 根据记录的id号，修改一条记录的信息
+                axios.get(`/brand/findById.do?id=${id}`).then(resp => {
+                    this.pojo = resp.data;
+                    this.imageUrl = this.pojo.image;//修改图片的url
                 })
             },
-            dele(id) {
-                this.$confirm('确定要删除此记录吗?', '提示', {
+            del(id) {//品牌删除
+                this.$confirm('确定要删除吗?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
-                }).then(() => {
-                    axios.get(`/brand/delete.do?id=${id}`).then(response => {
-                        this.fetchData(); //刷新列表
+                }).then(() => {//点击“确定”，才会执行此回调函数
+                    // 根据记录的id号，删除一条记录的信息
+                    axios.get(`/brand/delete.do?id=${id}`).then(resp => {
+                        this.$alert("删除成功！");
+                        this.fetchData();//刷新列表
                     })
-                })
+                });
             },
-            /* ****图片上传相关代码  如页面有图片上传功能放开注释 ****
-            handleAvatarSuccess(res, file) {
+            handleAvatarSuccess(res, file) {//图片上传
+                //this.imageUrl = URL.createObjectURL(file.raw);
+                /*
+                <el-upload>组件有个action属性，它会请求后端的Controller，
+                处理器会返回一个值，这个值就是上传成功后的图片的url，也就是file.response值。
+                （file就是那个图片，response就是后端处理器返回值）
+                action="/upload/native.do"
+                 */
                 this.imageUrl = file.response;
             },
-            beforeAvatarUpload(file) {
+            beforeAvatarUpload(file) {//图片上传前的钩子函数，对图片格式进行判断。
                 const isJPG = file.type === 'image/jpeg';
                 const isLt2M = file.size / 1024 / 1024 < 2;
 
@@ -220,8 +284,8 @@
                 if (!isLt2M) {
                     this.$message.error('上传头像图片大小不能超过 2MB!');
                 }
-                return isJPG && isLt2M;
-            }*/
+                return isJPG && isLt2M;//只有图片格式和大小都满足要求，才允许上传。
+            }
         }
     })
 </script>

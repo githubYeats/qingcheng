@@ -9,8 +9,8 @@ import java.util.List;
  */
 public class PageResult<T> implements Serializable {
 
-    private Long total;//返回记录数
-    private List<T> rows;//结果
+    private Long total;//返回记录总数
+    private List<T> rows;//分页查询结果
 
     public PageResult(Long total, List<T> rows) {
         this.total = total;

@@ -7,7 +7,14 @@ import java.io.Serializable;
  */
 public class Result implements Serializable {
 
-    private int code;//返回的业务码  0：成功执行  1：发生错误
+    /**
+     * 状态码：0，执行成功；1，执行失败
+     */
+    private int code;
+
+    /**
+     * 提示信息
+     */
     private String message;//信息
 
     public Result(int code, String message) {
@@ -15,6 +22,9 @@ public class Result implements Serializable {
         this.message = message;
     }
 
+    /**
+     * 默认执行成功
+     */
     public Result() {
         this.code=0;
         this.message = "执行成功";

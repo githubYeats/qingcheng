@@ -24,7 +24,7 @@
 
   <!--SpringMVC前端控制器：web项目集成SpringMVC框架-->
   <servlet>
-    <servlet-name>springmvc</servlet-name>
+    <servlet-name>DispatcherServlet</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     <!-- 指定加载的配置文件 ，通过参数contextConfigLocation加载 -->
     <init-param>
@@ -34,7 +34,7 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
-    <servlet-name>springmvc</servlet-name>
+    <servlet-name>DispatcherServlet</servlet-name>
     <url-pattern>*.do</url-pattern><!--访问路径，Servlet请求路径都要写成".do"-->
   </servlet-mapping>
 </web-app>
