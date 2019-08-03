@@ -90,7 +90,7 @@ public class SpecServiceImpl implements SpecService {
      */
     @Transactional //Spring注解，事务控制
     public void add(Spec spec) {
-        //新增规格时，将模板中的规格数量加1
+        //新增规格时，将模板表中的规格数量加1
         // 获取Template对象
         int template_id = spec.getTemplateId();
         Template template = templateMapper.selectByPrimaryKey(template_id);
@@ -124,7 +124,7 @@ public class SpecServiceImpl implements SpecService {
         Template template = templateMapper.selectByPrimaryKey(spec.getTemplateId());
         // 值减1
         template.setSpecNum(template.getSpecNum() - 1);
-        // 更新数据库
+        // 更新数据库tb_template表
         templateMapper.updateByPrimaryKeySelective(template);
         //########################################################必须放在数据被删除之前
 
