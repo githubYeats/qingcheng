@@ -92,6 +92,17 @@ public class CategoryServiceImpl implements CategoryService {
      * @param id
      */
     public void delete(Integer id) {
+        //判断当前分类是否有子分类
+        Example example = new Example(Category.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("parentId",id);
+        //根据查询条件，进行数量的查询
+        int count = categoryMapper.selectCountByExample(example);
+        if (count > 0){
+            //有下一级分类，不能删除
+            throw new RuntimeException("当前商品分类存在下一级分类，不能删除！");
+        }
+
         categoryMapper.deleteByPrimaryKey(id);
     }
 
