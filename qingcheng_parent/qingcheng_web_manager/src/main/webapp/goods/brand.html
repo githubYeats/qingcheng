@@ -5,7 +5,7 @@
     <title>brand管理</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../css/style.css">
 
@@ -77,9 +77,9 @@
                     <el-button class="dalfBut" @click="fetchData()">查询</el-button><!--主要按钮，背景呈蓝色-->
 
                     <!--新增品牌用
-                        dialogVisible = true    弹窗显示
+                        formVisible = true    弹窗显示
                     -->
-                    <el-button type="primary" class="butT" @click="dialogVisible=true;pojo={}">新增</el-button>
+                    <el-button type="primary" class="butT" @click="formVisible=true;pojo={}">新增</el-button>
                 </el-form>
                 <!--================================查询条件项  begin===================================-->
             </div>
@@ -108,7 +108,7 @@
                             scope.row.id    获取当前表格单元格所在记录的id号
                         -->
                         <!--修改品牌按钮-->
-                        <el-button @click="revise(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
+                        <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
 
                         <!--删除函数，不要取名delete()-->
                         <el-button @click="del(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
@@ -135,7 +135,7 @@
 
             <div class="add-form">
                 <!--=======================【弹窗】新增品牌/修改品牌共用  begin=======================-->
-                <el-dialog title="编辑" :visible.sync="dialogVisible">
+                <el-dialog title="编辑" :visible.sync="formVisible">
                     <!--嵌套表单
                         inline="true"时，所有表单项将会在界面上排成一行（一行不够，自动换行）
                         此处希望它一项一行。
@@ -178,7 +178,7 @@
 
                         <el-form-item>
                             <el-button type="primary" @click="save()">保存</el-button>
-                            <el-button @click="dialogVisible = false">关闭</el-button>
+                            <el-button @click="formVisible = false">关闭</el-button>
                         </el-form-item>
                     </el-form>
                 </el-dialog>
@@ -200,7 +200,7 @@
                 pageSize: 10, //每页显示记录数，临时赋值
                 total: 100, //总记录数，临时赋值
                 searchMap: {},//条件查询
-                dialogVisible: false, // 新增品牌。默认情况下，“新增”按钮不显示
+                formVisible: false, // 新增品牌。默认情况下，“新增”按钮不显示
                 pojo: {}, // 新增品牌，表单输入数据封装后的pojo对象
                 imageUrl: '' //图片上传功能，图片url
             }
@@ -225,7 +225,7 @@
                     // 保存数据后，刷新列表
                     this.fetchData();
                     // 关闭弹窗
-                    this.dialogVisible = false;
+                    this.formVisible = false;
                 });
             },*/
             save() {// 保存新增的品牌信息
@@ -240,11 +240,11 @@
                     // 保存数据后，刷新列表
                     this.fetchData();
                     // 关闭弹窗
-                    this.dialogVisible = false;
+                    this.formVisible = false;
                 });
             },
-            revise(id) {//修改品牌
-                this.dialogVisible = true;// 打开弹窗
+            edit(id) {//修改品牌
+                this.formVisible = true;// 打开弹窗
                 // 根据记录的id号，修改一条记录的信息
                 axios.get(`/brand/findById.do?id=${id}`).then(resp => {
                     this.pojo = resp.data;
@@ -281,6 +281,7 @@
                 if (!isJPG) {
                     this.$message.error('上传头像图片只能是 JPG 格式!');
                 }
+
                 if (!isLt2M) {
                     this.$message.error('上传头像图片大小不能超过 2MB!');
                 }
