@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://www.springframework.org/schema/security"
+             xsi:schemaLocation="
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+            ">
+
+    <!--资源放行
+        因为下面配置了全拦截  /**
+        必须放在<http> with pattern "/**"之前
+    -->
+    <http pattern="/login.html" security="none"/>
+    <http pattern="/login_error.html" security="none"/>
+    <http pattern="/css/**" security="none"/>
+    <http pattern="/img/**" security="none"/>
+    <http pattern="/js/**" security="none"/>
+    <http pattern="/*.ico" security="none"/>
+
+    <!--页面拦截规则
+        <http> with pattern "/**" must be last。
+    -->
+    <http>
+        <!--绝对路径拦截，对项目下所有的资源进行请求拦截
+            /*      只拦截webapp直接子目录
+            /**     全拦截
+        -->
+        <intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>
+
+        <!--自定义登录页面
+            defaultTarget must start with '/' or with 'http(s)'
+            指定的页面，必须都是以绝对路径方式指定。
+                login-page: 登录认证的请求页面
+                default-target-url: 登录认证成功后的跳转页面
+                authentication-failure-url: 认证失败的跳转页面
+
+            main.html是前端登录成功后，要进入的主页面。
+        -->
+       <form-login login-page="/login.html" default-target-url="/main.html" authentication-failure-url="/login.html"/>
+
+        <!--退出登录-->
+        <logout/>
+
+        <!--关闭csrf验证
+            跨站请求伪造
+        -->
+        <csrf disabled="true"/>
+    </http>
+
+    <!--认证管理器-->
+    <authentication-manager>
+        <authentication-provider user-service-ref="userDetailService">
+            <password-encoder ref="bcryptEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="userDetailService" class="com.qingcheng.controller.UserDetailServiceImpl"/>
+    <beans:bean id="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+</beans:beans>
