@@ -181,7 +181,6 @@ POST /spu/findList.do
 	"isEnableSpec": 是否启用规格,
 	"isDelete": 是否删除,
 	"status": 审核状态,
-
 }
 ```
 
