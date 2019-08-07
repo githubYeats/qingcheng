@@ -32,4 +32,10 @@ public interface MenuService {
 
     public void delete(String id);
 
+    /**
+     * 查询所有菜单
+     * @return
+     */
+    public List<Map<String, Object>> findAllMenu();
+
 }

@@ -46,6 +46,12 @@
             跨站请求伪造
         -->
         <csrf disabled="true"/>
+
+        <!--同源策略-->
+        <headers>
+            <!--same origin-->
+            <frame-options policy="SAMEORIGIN"/>
+        </headers>
     </http>
 
     <!--认证管理器-->
