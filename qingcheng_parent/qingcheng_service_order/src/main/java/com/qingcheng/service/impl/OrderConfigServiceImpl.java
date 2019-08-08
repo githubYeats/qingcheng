@@ -3,12 +3,18 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.OrderConfigMapper;
+import com.qingcheng.dao.OrderLogMapper;
+import com.qingcheng.dao.OrderMapper;
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderConfig;
+import com.qingcheng.pojo.order.OrderLog;
 import com.qingcheng.service.order.OrderConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +23,8 @@ public class OrderConfigServiceImpl implements OrderConfigService {
 
     @Autowired
     private OrderConfigMapper orderConfigMapper;
+
+
 
     /**
      * 返回全部记录
@@ -132,6 +140,66 @@ public class OrderConfigServiceImpl implements OrderConfigService {
 
         }
         return example;
+    }
+
+    @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
+    private OrderLogMapper orderLogMapper;
+
+    /**
+     * 订单超时处理逻辑
+     */
+    @Override
+    public void orderTimeoutLogic() {
+        // 获取订单配置对象
+        //1：tb_order_config的id字段值，表示使用表中第1条记录的配置进行订单超时的处理
+        OrderConfig orderConfig = orderConfigMapper.selectByPrimaryKey(1);
+
+        //查询超时时间        tb_order_config表字段值
+        Integer normalOrderTimeout = orderConfig.getOrderTimeout();//正常订单超时时间（分）
+
+        //得到超时时间点
+        LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(normalOrderTimeout);
+
+        //设置查询条件
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLessThan("createTime",localDateTime);//订单创建时间小于超时时间
+        criteria.andEqualTo("orderStatus","0");//未付款的
+        criteria.andEqualTo("isDelete","0");//未删除的
+
+        //查询超时订单
+        List<Order> orderList = orderMapper.selectByExample(example);
+        for (Order order : orderList) {
+            //-------------记录订单变动日志     tb_order_log表-------------
+            // id   订单日志id号     DB自动生成
+            // operater     操作人员
+            // operater_time    操作时间
+            // order_id     订单id号
+            // order_status     订单状态：0待付款；1待发货；2已发货；3已完成；4已关闭
+            // pay_status   支付状态：0未支付；1已支付；2已退款
+            // consign_status   发货状态：0未发货；1已发货
+            // remark   备注
+            OrderLog orderLog = new OrderLog();
+            //先默认写成system。做了Spring Security框架后，可动态获取当前操作用户
+            orderLog.setOperater("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderId(order.getId());
+            orderLog.setOrderStatus("4");//超时，将其关闭
+            orderLog.setPayStatus(order.getPayStatus());
+            orderLog.setConsignStatus(order.getConsignStatus());
+            orderLog.setRemarks("订单超时未支付，系统自动将其关闭！");
+
+            //更新数据库
+            orderLogMapper.insert(orderLog);
+
+            //更改订单状态
+            order.setOrderStatus("4");
+            order.setCloseTime(new Date());
+            orderMapper.updateByPrimaryKeySelective(order);
+        }
     }
 
 }

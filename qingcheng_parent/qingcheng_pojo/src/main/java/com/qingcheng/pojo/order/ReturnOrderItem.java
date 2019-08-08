@@ -11,22 +11,19 @@ import java.io.Serializable;
 public class ReturnOrderItem implements Serializable{
 
 	@Id
-	private Long id;//ID
-
-
-	
+	private String id;//分布式ID
 
 	private Long categoryId;//分类ID
 
-	private Long spuId;//SPU_ID
+	private String spuId;//SPU_ID
 
-	private Long skuId;//SKU_ID
+	private String skuId;//SKU_ID
 
-	private Long orderId;//订单ID
+	private String orderId;//订单ID
 
-	private Long orderItemId;//订单明细ID
+	private String orderItemId;//订单明细ID
 
-	private Long returnOrderId;//退货订单ID
+	private String returnOrderId;//退货订单ID
 
 	private String title;//标题
 
@@ -42,59 +39,66 @@ public class ReturnOrderItem implements Serializable{
 
 	private Integer weight;//重量
 
-	
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(Long id) {
+
+	public void setId(String id) {
 		this.id = id;
 	}
 
 	public Long getCategoryId() {
 		return categoryId;
 	}
+
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
 
-	public Long getSpuId() {
+	public String getSpuId() {
 		return spuId;
 	}
-	public void setSpuId(Long spuId) {
+
+	public void setSpuId(String spuId) {
 		this.spuId = spuId;
 	}
 
-	public Long getSkuId() {
+	public String getSkuId() {
 		return skuId;
 	}
-	public void setSkuId(Long skuId) {
+
+	public void setSkuId(String skuId) {
 		this.skuId = skuId;
 	}
 
-	public Long getOrderId() {
+	public String getOrderId() {
 		return orderId;
 	}
-	public void setOrderId(Long orderId) {
+
+	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
 
-	public Long getOrderItemId() {
+	public String getOrderItemId() {
 		return orderItemId;
 	}
-	public void setOrderItemId(Long orderItemId) {
+
+	public void setOrderItemId(String orderItemId) {
 		this.orderItemId = orderItemId;
 	}
 
-	public Long getReturnOrderId() {
+	public String getReturnOrderId() {
 		return returnOrderId;
 	}
-	public void setReturnOrderId(Long returnOrderId) {
+
+	public void setReturnOrderId(String returnOrderId) {
 		this.returnOrderId = returnOrderId;
 	}
 
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -102,6 +106,7 @@ public class ReturnOrderItem implements Serializable{
 	public Integer getPrice() {
 		return price;
 	}
+
 	public void setPrice(Integer price) {
 		this.price = price;
 	}
@@ -109,6 +114,7 @@ public class ReturnOrderItem implements Serializable{
 	public Integer getNum() {
 		return num;
 	}
+
 	public void setNum(Integer num) {
 		this.num = num;
 	}
@@ -116,6 +122,7 @@ public class ReturnOrderItem implements Serializable{
 	public Integer getMoney() {
 		return money;
 	}
+
 	public void setMoney(Integer money) {
 		this.money = money;
 	}
@@ -123,6 +130,7 @@ public class ReturnOrderItem implements Serializable{
 	public Integer getPayMoney() {
 		return payMoney;
 	}
+
 	public void setPayMoney(Integer payMoney) {
 		this.payMoney = payMoney;
 	}
@@ -130,6 +138,7 @@ public class ReturnOrderItem implements Serializable{
 	public String getImage() {
 		return image;
 	}
+
 	public void setImage(String image) {
 		this.image = image;
 	}
@@ -137,10 +146,8 @@ public class ReturnOrderItem implements Serializable{
 	public Integer getWeight() {
 		return weight;
 	}
+
 	public void setWeight(Integer weight) {
 		this.weight = weight;
 	}
-
-
-	
 }

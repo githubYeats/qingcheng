@@ -326,6 +326,11 @@ public class SpuServiceImpl implements SpuService {
         }
     }
 
+    /**
+     * 根据商品的spuId查询商品
+     * @param id    spuId是分布式ID，是字符串类型的
+     * @return
+     */
     @Override
     public Goods findGoodsById(String id) {
         //查询Spu

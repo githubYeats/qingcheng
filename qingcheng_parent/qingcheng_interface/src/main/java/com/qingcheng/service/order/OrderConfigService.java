@@ -32,4 +32,9 @@ public interface OrderConfigService {
 
     public void delete(Integer id);
 
+    /**
+     * 订单超时处理逻辑
+     */
+    public void orderTimeoutLogic();
+
 }

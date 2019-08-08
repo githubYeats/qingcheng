@@ -13,14 +13,11 @@ public class OrderLog implements Serializable{
 	@Id
 	private String id;//ID
 
-
-	
-
 	private String operater;//操作员
 
 	private java.util.Date operateTime;//操作时间
 
-	private Long orderId;//订单ID
+	private String orderId;//订单ID
 
 	private String orderStatus;//订单状态
 
@@ -52,10 +49,10 @@ public class OrderLog implements Serializable{
 		this.operateTime = operateTime;
 	}
 
-	public Long getOrderId() {
+	public String getOrderId() {
 		return orderId;
 	}
-	public void setOrderId(Long orderId) {
+	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
 
