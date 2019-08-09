@@ -9,6 +9,7 @@ import com.qingcheng.service.business.AdService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -110,7 +111,7 @@ public class AdServiceImpl implements AdService {
             }
             // 广告位置
             if(searchMap.get("position")!=null && !"".equals(searchMap.get("position"))){
-                criteria.andLike("position","%"+searchMap.get("position")+"%");
+                criteria.andEqualTo("position",searchMap.get("position"));
             }
             // 状态
             if(searchMap.get("status")!=null && !"".equals(searchMap.get("status"))){
@@ -138,4 +139,31 @@ public class AdServiceImpl implements AdService {
         return example;
     }
 
+    /**
+     * 根据广告位置查询允许展示的广告
+     * @param position
+     * @return
+     */
+    @Override
+    public List<Ad> findAdByPosition(String position) {
+        Example example = new Example(Ad.class);
+        Example.Criteria criteria = example.createCriteria();
+
+        //设置查询条件
+        criteria.andEqualTo("position",position);
+        //允许展示条件
+        /*
+        start_time <= 当前时间
+        end_time >= 当前时间
+        status = 1  有效
+        提示：如果加上时间条件查不出来，可以将其去掉。   这是通用Mapper本身的bug。
+         */
+        /*criteria.andLessThanOrEqualTo("startTime",new Date());
+        criteria.andGreaterThanOrEqualTo("endTime",new Date());*/
+        criteria.andEqualTo("status","1");
+
+        //查询并返回
+        List<Ad> adList = adMapper.selectByExample(example);
+        return adList;
+    }
 }

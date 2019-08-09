@@ -24,6 +24,7 @@
         <module>qingcheng_service_system</module>
         <module>qingcheng_service_user</module>
         <module>qingcheng_web_manager</module>
+        <module>qingcheng_web_portal</module>
     </modules>
 
     <!--父工程打包类型，必须是pom-->
