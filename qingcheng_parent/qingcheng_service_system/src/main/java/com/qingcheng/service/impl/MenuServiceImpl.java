@@ -9,6 +9,8 @@ import com.qingcheng.service.system.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -130,4 +132,43 @@ public class MenuServiceImpl implements MenuService {
         return example;
     }
 
+
+    /**
+     * 查询所有菜单
+     * @return
+     */
+    /*
+     代码生成器有生成如下方法： public List<Menu> findAll()
+    也是查询并返回全部菜单，为什么不用呢？ 因为Menu实体类中没有children属性
+     */
+    @Override
+    public List<Map<String, Object>> findAllMenu() {
+        List<Menu> menuList = findAll();
+        return findMenuListByParentId(menuList,"0");
+    }
+
+    /**
+     * 递归查询各级菜单
+     * @param menuList
+     * @param parentId
+     * @return
+     */
+    private List<Map<String, Object>> findMenuListByParentId(List<Menu> menuList, String parentId){
+        List<Map<String,Object>> mapList = new ArrayList<>();
+       for(Menu menu:menuList){
+           if(menu.getParentId().equals(parentId)){
+               Map<String,Object> map = new HashMap<String,Object>();
+               map.put("path",menu.getId());
+               map.put("title",menu.getName());
+               map.put("icon",menu.getIcon());
+               map.put("linkUrl",menu.getUrl());
+
+               //children属性
+               List<Map<String, Object>> sub_menuList = findMenuListByParentId(menuList, menu.getId());
+               map.put("children",sub_menuList);
+               mapList.add(map);
+           }
+       }
+        return mapList;
+    }
 }

@@ -105,16 +105,25 @@ public class AdminServiceImpl implements AdminService {
         Example.Criteria criteria = example.createCriteria();
         if(searchMap!=null){
             // 用户名
+            /*
+            自动生成的代码，查询条件均是模糊查询。     这里根据用户名查询用户，需要改为“精确查询”
+             */
             if(searchMap.get("loginName")!=null && !"".equals(searchMap.get("loginName"))){
-                criteria.andLike("loginName","%"+searchMap.get("loginName")+"%");
+                //criteria.andLike("loginName","%"+searchMap.get("loginName")+"%");
+                criteria.andEqualTo("loginName",searchMap.get("loginName"));
             }
+
             // 密码
             if(searchMap.get("password")!=null && !"".equals(searchMap.get("password"))){
                 criteria.andLike("password","%"+searchMap.get("password")+"%");
             }
+
             // 状态
+            /*
+            模糊查询改为精确查询
+             */
             if(searchMap.get("status")!=null && !"".equals(searchMap.get("status"))){
-                criteria.andLike("status","%"+searchMap.get("status")+"%");
+                criteria.andEqualTo("status",searchMap.get("status"));
             }
 
             // id
