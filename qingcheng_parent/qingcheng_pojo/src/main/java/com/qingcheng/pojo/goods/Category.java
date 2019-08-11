@@ -13,9 +13,6 @@ public class Category implements Serializable{
 	@Id
 	private Integer id;//分类ID
 
-
-	
-
 	private String name;//分类名称
 
 	private Integer goodsNum;//商品数量
@@ -87,6 +84,17 @@ public class Category implements Serializable{
 		this.templateId = templateId;
 	}
 
-
-	
+	@Override
+	public String toString() {
+		return "Category{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", goodsNum=" + goodsNum +
+				", isShow='" + isShow + '\'' +
+				", isMenu='" + isMenu + '\'' +
+				", seq=" + seq +
+				", parentId=" + parentId +
+				", templateId=" + templateId +
+				'}';
+	}
 }

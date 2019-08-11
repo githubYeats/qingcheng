@@ -32,4 +32,10 @@ public interface CategoryService {
 
     public void delete(Integer id);
 
+    /**
+     * 查询所有商品分类项    Map<String, String>        Map<"name", "分类名">
+     * @return
+     */
+    public List<Map<String, String>> findCategoryTree();
+
 }
