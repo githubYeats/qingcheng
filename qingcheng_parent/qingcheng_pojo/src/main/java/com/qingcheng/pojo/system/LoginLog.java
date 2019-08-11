@@ -13,9 +13,6 @@ public class LoginLog implements Serializable{
 	@Id
 	private Integer id;//id
 
-
-	
-
 	private String loginName;//login_name
 
 	private String ip;//ip

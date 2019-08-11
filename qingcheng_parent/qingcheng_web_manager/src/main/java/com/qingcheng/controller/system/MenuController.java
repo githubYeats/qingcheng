@@ -60,6 +60,10 @@ public class MenuController {
         return new Result();
     }
 
+    /**
+     * 查询所有菜单项
+     * @return
+     */
     @GetMapping("/findAllMenu")
     public List<Map<String, Object>> findAllMenu(){
         List<Map<String, Object>> allMenu = menuService.findAllMenu();

@@ -18,6 +18,10 @@
     <http pattern="/js/**" security="none"/>
     <http pattern="/*.ico" security="none"/>
 
+    <!--配置“认证成功管理器”-->
+    <beans:bean id="authenticationSuccessHandler"
+                class="com.qingcheng.controller.AuthenticationSuccessHandlerImpl"/>
+
     <!--页面拦截规则
         <http> with pattern "/**" must be last。
     -->
@@ -37,9 +41,16 @@
 
             main.html是前端登录成功后，要进入的主页面。
         -->
-       <form-login login-page="/login.html" default-target-url="/main.html" authentication-failure-url="/login.html"/>
+        <form-login login-page="/login.html"
+                    default-target-url="/main.html"
+                    authentication-failure-url="/login.html"
+                    authentication-success-handler-ref="authenticationSuccessHandler"
+        />
 
-        <!--退出登录-->
+        <!--退出登录
+        配置此项后，Spring Security框架会为我们自动提供退出功能，地址为/logout，要求http请求以post方式提交。
+        后台无需添加任何代码（不需要controller处理器)，修改前端页面即可！
+        -->
         <logout/>
 
         <!--关闭csrf验证
