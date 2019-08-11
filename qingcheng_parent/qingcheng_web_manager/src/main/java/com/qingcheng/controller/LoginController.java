@@ -43,7 +43,8 @@ public class LoginController {
     @GetMapping("/findLoginLog")
     public PageResult<LoginLog> findLoginLog(int page, int size) {
         //查询条件
-        String loginName = SecurityContextHolder.getContext().getAuthentication().getName();
+        //String loginName = SecurityContextHolder.getContext().getAuthentication().getName();
+        String loginName = "admin";
         Map map = new HashMap();
         map.put("loginName", loginName);
         return loginLogService.findPage(map, page, size);

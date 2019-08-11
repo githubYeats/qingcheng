@@ -44,8 +44,7 @@
         <form-login login-page="/login.html"
                     default-target-url="/main.html"
                     authentication-failure-url="/login.html"
-                    authentication-success-handler-ref="authenticationSuccessHandler"
-        />
+                    authentication-success-handler-ref="authenticationSuccessHandler"/>
 
         <!--退出登录
         配置此项后，Spring Security框架会为我们自动提供退出功能，地址为/logout，要求http请求以post方式提交。

@@ -24,7 +24,7 @@
 
   <!--Spring Security的过滤器
       必须放在SpringMVC前端控制器的配置之前
-      url-pattern:/   控制所有请求，都要经过此过滤器
+      url-pattern:/*   控制所有请求，都要经过此过滤器
   -->
   <filter>
     <filter-name>springSecurityFilterChain</filter-name>

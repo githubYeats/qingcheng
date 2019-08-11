@@ -53,6 +53,17 @@ public interface OrderService {
      */
     public void batchSend(List<Order> orderList);
 
+    /**
+     * 合并订单
+     * @param orderId1 主订单号
+     * @param orderId2 从订单号，将要被合并到主订单的订单。
+     */
+    public void merge(String orderId1, String orderId2);
 
+    /**
+     * 拆分订单
+     * @param maps
+     */
+    public void split(List<Map<String ,Integer>> maps);
 
 }

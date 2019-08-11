@@ -10,6 +10,7 @@ import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.pojo.order.OrderItemOrder;
 import com.qingcheng.service.order.OrderService;
+import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,9 @@ import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    @Autowired
+    private IdWorker idWorker;
 
     @Autowired
     private OrderMapper orderMapper;
@@ -206,7 +210,7 @@ public class OrderServiceImpl implements OrderService {
             // 批量发货的条件
             if (searchMap.get("ids") != null) {
                 //public Criteria andIn(String property, Iterable values)   第2个参数，得是一个List
-                criteria.andIn("id", Arrays.asList((String[])searchMap.get("ids")));
+                criteria.andIn("id", Arrays.asList((String[]) searchMap.get("ids")));
             }
         }
         return example;
@@ -318,5 +322,78 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    /**
+     * 合并订单
+     *
+     * @param orderId1 主订单号
+     * @param orderId2 从订单号，将要被合并到主订单的订单。
+     */
+    @Override
+    public void merge(String orderId1, String orderId2) {
 
+    }
+
+    /**
+     * 拆分订单
+     *
+     * @param maps Map<String, Integer>   Map<订单项id, 拆分数量>
+     */
+    @Override
+    public void split(List<Map<String, Integer>> maps) {
+        // 一个订单中多个订单项进行拆分，生成一个新的订单，新订单中包含拆分出来的多个订单项
+        // 创建新订单
+        Order newOrder = new Order();
+        String newOrderId = idWorker.nextId() + "";
+        newOrder.setId(newOrderId);
+
+        // 拆分
+        for (Map<String, Integer> map : maps) {
+            Set<String> orderItemIds = map.keySet();//待拆分的各订单项id
+            for (String orderItemId : orderItemIds) {
+                /*
+                ------------------------------前置条件判断-------------------------------------
+                前置条件，即可以进行拆单的条件。   前置条件很多，如：
+                    1. 所选订单，其is_delete字段，是否为0，即未逻辑删除
+                    2. 是否是待发货订单 & 是否是未关闭的订单 & 。。。
+                这里目前仅作最简单的判断，即进行拆分数量的判断！！
+                 */
+                // 订单项拆分数量要合法：大于0，小于原数量     =0 | =原数量，不用拆单
+                int num = map.get(orderItemId);//拆分数量
+                OrderItem orderItem = orderItemMapper.selectByPrimaryKey(orderItemId);//原订单项
+                int totalNum = orderItem.getNum();//原来的总数量
+                if (num < 0 || num > totalNum) {
+                    continue;
+                }
+
+                /*
+                -----------------------------数据库中，添加新的记录------------------------------------
+                1. 生成新订单项，添加到订单明细表（tb_order_item）中，并设置其订单归属（即order_id字段值）
+                2. 生成的新订单，添加到订单表中（tb_order）
+                 */
+                //新订单项 = 原订单项，然后再设置新订单项中需要修改的地方
+                OrderItem newOrderItem = orderItem;
+                // id字段     新订单项的id     分布式id   新订单项，新的id
+                String newOrderItemId = idWorker.nextId() + "";
+                newOrderItem.setOrderId(newOrderItemId);
+                // num字段       新订单项的数量
+                newOrderItem.setNum(num);
+                // money字段      新订单项总金额
+                newOrderItem.setMoney(orderItem.getMoney() * num);
+                // sku_id字段
+                // order_id字段     新订单项属于哪个新的订单
+                newOrderItem.setOrderId(newOrderId);
+                // pay_money字段      付金额
+                // post_fee字段       运费
+                // is_return字段      是否退货
+                // 添加到数据库
+                orderItemMapper.updateByPrimaryKey(newOrderItem);
+                orderMapper.updateByPrimaryKey(newOrder);
+
+                /*
+                -----------------------------修改关联表的相关信息-----------------------------
+                 */
+                // 这是业务要求，得靠业务经验的积累，才能知道具体要修改哪些表，哪些字段
+            }
+        }
+    }
 }
