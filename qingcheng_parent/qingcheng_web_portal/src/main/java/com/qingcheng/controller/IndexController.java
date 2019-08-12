@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Author: Feiyue
  * Date: 2019/8/9 19:20
- * Desc:
+ * Desc: 网站前台首页--用户页面
  */
 @Controller
 public class IndexController {
@@ -38,7 +38,7 @@ public class IndexController {
         /*
         ---------首页商品分类------------------
          */
-        List<Map> categoryTree = categoryService.findCategoryTree();
+        List<Map<String, String>> categoryTree = categoryService.findCategoryTree();
         model.addAttribute("categoryTree",categoryTree);
 
         return "index";
