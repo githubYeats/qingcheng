@@ -29,8 +29,10 @@
         <!--绝对路径拦截，对项目下所有的资源进行请求拦截
             /*      只拦截webapp直接子目录
             /**     全拦截
+
+            如果想从项目中移除安全认证功能，注释掉下面的拦截器即可，其他地方不用动！
         -->
-        <intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>
+        <!--<intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>-->
 
         <!--自定义登录页面
             defaultTarget must start with '/' or with 'http(s)'

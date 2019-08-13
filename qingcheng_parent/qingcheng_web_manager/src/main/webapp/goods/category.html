@@ -58,7 +58,8 @@
         <div class="box">
             <div class="filter-container">
                 <!-- 商品分类管理：新增分类 -->
-                <el-button type="primary" class="butT" @click="formVisible=true;pojo={parentId:searchMap.parentId}">新增</el-button>
+                <el-button type="primary" class="butT" @click="formVisible=true;pojo={parentId:searchMap.parentId}">新增
+                </el-button>
 
                 <!-- 商品分类管理：返回上一级分类页面 -->
                 <el-button type="primary" class="butT" @click="returnQuery()">返回上一级</el-button>
@@ -274,15 +275,15 @@
                 formVisible: false,
                 imageUrl: '',
                 parentIds: [], // 商品管理多级分类页面，路径记录。
-                tempalteList:[],//模板列表，页面加载时，发送ajax请求到后台数据库去查询。在created()函数中操作
+                tempalteList: [],//模板列表，页面加载时，发送ajax请求到后台数据库去查询。在created()函数中操作
             }
         },
         created() {
             this.fetchData();
 
             //加载模板列表值
-            axios.get(`/template/findAll.do`).then(resp=>{
-               this.tempalteList = resp.data;
+            axios.get(`/template/findAll.do`).then(resp => {
+                this.tempalteList = resp.data;
             });
         },
         methods: {
@@ -314,10 +315,10 @@
                     type: 'warning'
                 }).then(() => {
                     axios.get(`/category/delete.do?id=${id}`).then(response => {
-                        if(response.data.code == 0){
+                        if (response.data.code == 0) {
                             // code，是Result实体中的属性。 等于0，表示执行成功，没有异常或错误。
                             this.fetchData(); //刷新列表
-                        }else {
+                        } else {
                             // 不能删除，则将异常信息弹出，提示用户。
                             this.$alert(response.data.message);
                         }
