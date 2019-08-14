@@ -1931,7 +1931,8 @@
                                 </div>
                             </dt>
                             <dd th:each="specItemValue:${specItem.value}">
-                                <a href="javascript:;" th:class="${specItemValue.checked?'selected':''}">
+                                <a th:href="${specItemValue.skuUrl}"
+                                   th:class="${specItemValue.skuUrl==null?'locked':(specItemValue.checked?'selected':'')}">
                                     <i th:text="${specItemValue.option}">金色</i><!--规格值-->
                                     <span title="点击取消选择">&nbsp;</span>
                                 </a>

@@ -5,7 +5,7 @@
 
     <!--配置IdWorker对象：分布式id解决方案  snowflake算法-->
     <bean id="idWorker" class="com.qingcheng.util.IdWorker">
-        <constructor-arg index="0" value="1"></constructor-arg>
-        <constructor-arg index="1" value="1"></constructor-arg>
+        <constructor-arg index="0" value="1"/>
+        <constructor-arg index="1" value="1"/>
     </bean>
 </beans>
