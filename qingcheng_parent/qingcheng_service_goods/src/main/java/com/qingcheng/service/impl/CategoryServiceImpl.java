@@ -88,6 +88,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public void add(Category category) {
         categoryMapper.insert(category);
+        saveCategoryTree2Redis();
     }
 
     /**
@@ -97,6 +98,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public void update(Category category) {
         categoryMapper.updateByPrimaryKeySelective(category);
+        saveCategoryTree2Redis();
     }
 
     /**
@@ -117,6 +119,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         categoryMapper.deleteByPrimaryKey(id);
+        saveCategoryTree2Redis();
     }
 
     /**
