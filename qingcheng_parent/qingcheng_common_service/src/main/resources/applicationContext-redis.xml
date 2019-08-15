@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:cache="http://www.springframework.org/schema/cache"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.springframework.org/schema/cache http://www.springframework.org/schema/beans/spring-cache.xsd
-       ">
+             http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        ">
+
+    <!--加载配置文件  在此项目中，不再需要这句配置，因为common工程中已经有加载配置文件，此处再加载就重复了，会导致各种意外的错误-->
+    <!--<context:property-placeholder location="classpath:redis.properties"/>-->
 
     <!-- Redis 相关配置 -->
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="maxIdle" value="${redis.maxIdle}"/>
-        <property name="maxWaitMillis" value="${redis.maxWait}"/>
+        <property name="maxWaitMillis" value="${redis.maxWaitMillis}"/>
     </bean>
-
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
-          p:host-name="${redis.host}" p:port="${redis.port}" p:password="${redis.pass}" p:pool-config-ref="poolConfig"/>
-
+          p:host-name="${redis.host}"
+          p:port="${redis.port}"
+          p:password="${redis.password}"
+          p:pool-config-ref="poolConfig">
+    </bean>
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
         <property name="connectionFactory" ref="jedisConnectionFactory"/>
     </bean>

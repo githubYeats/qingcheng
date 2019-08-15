@@ -7,7 +7,9 @@ import com.qingcheng.dao.CategoryMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Category;
 import com.qingcheng.service.goods.CategoryService;
+import com.qingcheng.util.CacheKey;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -172,23 +174,8 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public List<Map<String, String>> findCategoryTree() {
-        // 查询思路：先查询出所有分类，然后递归查询出1级/2级/3级分类并封装成Map对象，然后给前端返回
-
-        // ----------------构造查询条件，查询出所有1级分类------------
-        Example example = new Example(Category.class);
-        Example.Criteria criteria = example.createCriteria();
-        // is_show字段=1   显示     模板查询条件中的模糊查询要改为精确查询
-        criteria.andEqualTo("isShow", "1");
-        // 设置排序
-        example.setOrderByClause("seq");
-        // 查数据库表
-        List<Category> categoryList = categoryMapper.selectByExample(example);
-        System.out.println(categoryList);
-
-        // 递归查询
-        List<Map<String, String>> mapList = findCategoriesByParentId(categoryList, 0);
-
-        return mapList;
+        //从缓存中查询
+        return (List<Map<String, String>>) redisTemplate.boundValueOps(CacheKey.CATEGORY_TREE).get();
     }
 
     private List<Map<String, String>> findCategoriesByParentId(List<Category> categoryList, Integer parentId) {
@@ -203,6 +190,34 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         return mapList;
+    }
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    /**
+     * 将商品分类树存入Redis缓存
+     */
+    @Override
+    public void saveCategoryTree2Redis() {
+        // 获取商品分类树
+        // 查询思路：先查询出所有分类，然后递归查询出1级/2级/3级分类并封装成Map对象，然后给前端返回
+
+        // ----------------构造查询条件，查询出所有1级分类------------
+        Example example = new Example(Category.class);
+        Example.Criteria criteria = example.createCriteria();
+        // is_show字段=1   显示     模板查询条件中的模糊查询要改为精确查询
+        criteria.andEqualTo("isShow", "1");
+        // 设置排序
+        example.setOrderByClause("seq");
+        // 查数据库表
+        List<Category> categoryList = categoryMapper.selectByExample(example);
+        System.out.println(categoryList);
+        // 递归查询
+        List<Map<String, String>> categoryTree = findCategoriesByParentId(categoryList, 0);
+
+        // 存入缓存
+        redisTemplate.boundValueOps(CacheKey.CATEGORY_TREE).set(categoryTree);
     }
 
 }

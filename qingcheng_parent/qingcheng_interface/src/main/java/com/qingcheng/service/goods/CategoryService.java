@@ -38,4 +38,8 @@ public interface CategoryService {
      */
     public List<Map<String, String>> findCategoryTree();
 
+    /**
+     * 将商品分类树存入Redis缓存
+     */
+    public void saveCategoryTree2Redis();
 }
