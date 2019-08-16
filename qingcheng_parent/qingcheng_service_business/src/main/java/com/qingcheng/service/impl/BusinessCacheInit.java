@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 这里利用该Init类，在项目启动后就进行缓存预热。
  */
 @Component //Spring注解
-public class Init implements InitializingBean {
+public class BusinessCacheInit implements InitializingBean {
 
     @Autowired
     private AdService adService;

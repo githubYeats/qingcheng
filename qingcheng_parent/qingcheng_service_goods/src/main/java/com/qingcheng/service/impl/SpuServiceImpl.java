@@ -10,16 +10,15 @@ import com.qingcheng.dao.SkuMapper;
 import com.qingcheng.dao.SpuMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.*;
+import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.goods.SpuService;
 import com.qingcheng.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service(interfaceClass = SpuService.class) //duboo注解
 public class SpuServiceImpl implements SpuService {
@@ -109,7 +108,25 @@ public class SpuServiceImpl implements SpuService {
      * @param id
      */
     public void delete(String id) {
-        spuMapper.deleteByPrimaryKey(id);
+        spuMapper.deleteByPrimaryKey(id);//自动生成的代码，删除一个spu
+
+        /*
+        删除一个spu时，其下的所有sku都被删除了。
+        缓存中存放的那些sku的价格数据也就不需要了，得清除掉以释放缓存空间。
+
+        如果不清除呢？  那么如此堆积下去，缓存就成了垃圾场了！
+         */
+
+        //-------------- 删除缓存的sku价格数据------------------------------------
+        // 以spuId（即方法中的id）为查询条件，从tb_sku表中查询出对应spuId下的所有sku
+        //构造查询条件，进行查询
+        Map<String, Object> searchMap = new HashMap<>();
+        searchMap.put("spuId", id);
+        List<Sku> skuList = skuService.findList(searchMap);
+        //遍历skuList，删除各sku的价格缓存
+        for (Sku sku : skuList) {
+            skuService.deletePriceFromRedisBySkuId(sku.getId());
+        }
     }
 
     /**
@@ -228,6 +245,9 @@ public class SpuServiceImpl implements SpuService {
     @Autowired
     private CategoryBrandMapper categoryBrandMapper;
 
+    @Autowired
+    private SkuService skuService;
+
     /**
      * 新增商品。  会保存一个spu信息，与多个sku信息。      引入“分页式ID”：雪花算法
      *
@@ -285,6 +305,9 @@ public class SpuServiceImpl implements SpuService {
 
         List<Sku> skuList = goods.getSkuList();
         for (Sku sku : skuList) {
+
+            skuService.savePrice2RedisBySukId(sku.getId(), sku.getPrice());
+
             // spu_id
             sku.setSpuId(spu.getId());
             if (sku.getId() == null) {//SKU无id时，表明是新增商品
@@ -314,6 +337,9 @@ public class SpuServiceImpl implements SpuService {
             sku.setCommentNum(0);
             sku.setSaleNum(0);
             skuMapper.insert(sku);
+
+            // 商品价格变化后，更新商品价格缓存数据
+            skuService.savePrice2RedisBySukId(sku.getId(), sku.getPrice());
         }
 
         //建立分类和品牌的关联    tb_category_brand表
@@ -328,7 +354,8 @@ public class SpuServiceImpl implements SpuService {
 
     /**
      * 根据商品的spuId查询商品
-     * @param id    spuId是分布式ID，是字符串类型的
+     *
+     * @param id spuId是分布式ID，是字符串类型的
      * @return
      */
     @Override
@@ -463,9 +490,11 @@ public class SpuServiceImpl implements SpuService {
         // 批量更新数据库记录
         int count = spuMapper.updateByExampleSelective(spu, example);//记录更新记录条数
 
-        // 记录商品日志   示完
+        // 记录商品日志   未完
 
         return count;
 
     }
+
+
 }

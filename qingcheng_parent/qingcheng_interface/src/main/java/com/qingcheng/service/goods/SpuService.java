@@ -80,4 +80,6 @@ public interface SpuService {
      */
     public int pullMany(String[] ids);
 
+
+
 }

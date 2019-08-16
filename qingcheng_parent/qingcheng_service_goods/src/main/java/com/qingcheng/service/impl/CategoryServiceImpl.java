@@ -10,6 +10,8 @@ import com.qingcheng.service.goods.CategoryService;
 import com.qingcheng.util.CacheKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -185,7 +187,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<Map<String, String>> mapList = new ArrayList<>();
         for (Category category : categoryList) {
             if (category.getParentId().equals(parentId)) {
-                System.out.println(category);
+                //System.out.println(category);
                 Map map = new HashMap();
                 map.put("name", category.getName());
                 map.put("categories", findCategoriesByParentId(categoryList, category.getId()));
@@ -215,7 +217,8 @@ public class CategoryServiceImpl implements CategoryService {
         example.setOrderByClause("seq");
         // 查数据库表
         List<Category> categoryList = categoryMapper.selectByExample(example);
-        System.out.println(categoryList);
+        //System.out.println(categoryList);
+
         // 递归查询
         List<Map<String, String>> categoryTree = findCategoriesByParentId(categoryList, 0);
 

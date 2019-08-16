@@ -1,6 +1,7 @@
 package com.qingcheng.service.impl;
 
 import com.qingcheng.service.goods.CategoryService;
+import com.qingcheng.service.goods.SkuService;
 import jdk.nashorn.internal.ir.annotations.Reference;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,13 @@ import org.springframework.stereotype.Component;
  * 这里利用该Init类，在项目启动后就进行缓存预热。
  */
 @Component //Spring注解
-public class Init implements InitializingBean {
+public class GoodsCacheInit implements InitializingBean {
 
     @Autowired
-//    @Reference
     private CategoryService categoryService;
+
+    @Autowired
+    private SkuService skuService;
 
     /**
      * 项目启动后，就将热点数据加载到Redis，进行缓存预热。
@@ -28,7 +31,10 @@ public class Init implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("----缓存预热----");
 
-        // 调用saveCategoryTree2Redis()方法
+        // 商品分类数据缓存
         categoryService.saveCategoryTree2Redis();
+
+        // 商品价格数据缓存
+        skuService.saveAllPrice2Redis();
     }
 }
