@@ -57,5 +57,4 @@ public interface SkuService {
      */
     public void deletePriceFromRedisBySkuId(String skuId);
 
-
 }
