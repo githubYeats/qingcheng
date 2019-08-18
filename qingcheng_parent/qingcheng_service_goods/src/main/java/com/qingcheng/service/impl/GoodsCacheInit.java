@@ -2,7 +2,6 @@ package com.qingcheng.service.impl;
 
 import com.qingcheng.service.goods.CategoryService;
 import com.qingcheng.service.goods.SkuService;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,5 +35,8 @@ public class GoodsCacheInit implements InitializingBean {
 
         // 商品价格数据缓存
         skuService.saveAllPrice2Redis();
+
+        // 加载sku数据到elasticsearch。  也可放到web_manager工程中的SkuController中去实现
+        //skuService.batchInsertData2ES();
     }
 }

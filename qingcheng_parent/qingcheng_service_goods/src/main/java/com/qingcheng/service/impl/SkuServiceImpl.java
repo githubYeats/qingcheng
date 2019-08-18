@@ -1,6 +1,8 @@
 package com.qingcheng.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.SkuMapper;
@@ -8,12 +10,22 @@ import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
 import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.util.CacheKey;
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -242,5 +254,58 @@ public class SkuServiceImpl implements SkuService {
     @Override
     public void deletePriceFromRedisBySkuId(String skuId) {
         redisTemplate.boundHashOps(CacheKey.SKU_PRICE).delete(skuId);
+    }
+
+    /**
+     * 批量插入数量到elasticsearch
+     * @throws IOException
+     */
+    @Override
+    public void batchInsertData2ES() throws IOException {
+        //------------------------------- 1.连接Rest接口---------------------------------
+        HttpHost httpHost = new HttpHost("localhost", 9200, "http");
+        RestClientBuilder restClientBuilder = RestClient.builder(httpHost);//rest构建器
+        RestHighLevelClient restHighLevelClient = new RestHighLevelClient(restClientBuilder);//高级客户端对象
+
+        // -------------------------------2.封装请求对象------------------------------------
+
+        BulkRequest bulkRequest = new BulkRequest();
+        List<Sku> skuList = skuMapper.selectAll();
+        int count = 0;
+        for (Sku sku : skuList) {
+            // 创建索引结构   public IndexRequest(String index, String type, String id)
+            IndexRequest indexRequest = new IndexRequest("sku", "doc",sku.getId());
+            // 创建文档document
+            Map skuMap = new HashMap();
+            //skuMap.put("id",sku.getId());
+            skuMap.put("spuId",sku.getSpuId());
+            skuMap.put("image",sku.getImage());
+            skuMap.put("name", sku.getName());
+            skuMap.put("brandName", sku.getBrandName());
+            skuMap.put("categoryName", sku.getCategoryName());
+            skuMap.put("price", sku.getPrice());
+            // 创建时间
+            skuMap.put("createTime", sku.getCreateTime());
+            skuMap.put("saleNum", sku.getSaleNum());
+            skuMap.put("commentNum", sku.getCommentNum());
+            // 添加规格参数    对象
+            JSONObject jsonObject = JSON.parseObject(sku.getSpec());
+            skuMap.put("spec", jsonObject);
+            // 添加文档到es
+            indexRequest.source(skuMap);
+            bulkRequest.add(indexRequest);//可多次添加
+
+            System.out.println("成功插入第" + (count++) + "条数据！");
+
+        }
+
+        //----------------------------3.获取响应结果---------------------------------
+        BulkResponse bulkResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+        int status = bulkResponse.status().getStatus();//http响应状态码
+        System.out.println(status);
+
+
+        //----------------------------4.关闭连接------------------------------------
+        restHighLevelClient.close();
     }
 }
