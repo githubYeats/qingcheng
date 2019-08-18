@@ -7,6 +7,7 @@ import com.qingcheng.pojo.goods.Sku;
 import com.qingcheng.service.goods.SkuService;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -60,5 +61,15 @@ public class SkuController {
         return new Result();
     }
 
+    /**
+     * 将MySQL中的数据，批量导入到elasticsearch中，以备检索之用
+     * @return
+     * @throws IOException
+     */
+    @PostMapping("/batch") // elasticsearch要求更新数据时，使用POST方式，GET方式是查询数据
+    public Result batch() throws IOException {
+        skuService.batchInsertData2ES();
+        return new Result();
+    }
 
 }

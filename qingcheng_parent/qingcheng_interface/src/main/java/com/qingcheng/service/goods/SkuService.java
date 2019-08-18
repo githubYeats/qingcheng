@@ -2,6 +2,7 @@ package com.qingcheng.service.goods;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -56,5 +57,10 @@ public interface SkuService {
      * @param skuId
      */
     public void deletePriceFromRedisBySkuId(String skuId);
+
+    /**
+     * 批量插入数量到elasticsearch
+     */
+    public void batchInsertData2ES() throws IOException;
 
 }
