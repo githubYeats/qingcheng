@@ -1,4 +1,5 @@
 package com.qingcheng.service.goods;
+
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
 
@@ -17,10 +18,10 @@ public interface SkuService {
     public PageResult<Sku> findPage(int page, int size);
 
 
-    public List<Sku> findList(Map<String,Object> searchMap);
+    public List<Sku> findList(Map<String, Object> searchMap);
 
 
-    public PageResult<Sku> findPage(Map<String,Object> searchMap,int page, int size);
+    public PageResult<Sku> findPage(Map<String, Object> searchMap, int page, int size);
 
 
     public Sku findById(String id);
@@ -40,6 +41,7 @@ public interface SkuService {
 
     /**
      * 查询商品价格（单位：分）
+     *
      * @param skuId
      * @return
      */
@@ -47,13 +49,15 @@ public interface SkuService {
 
     /**
      * 修改某商品价格数据后，对应地更新缓存数据
+     *
      * @param skuId
      * @param price
      */
-    public void savePrice2RedisBySukId(String skuId,Integer price);
+    public void savePrice2RedisBySukId(String skuId, Integer price);
 
     /**
      * 某商品（一个sku）被下架或删除时，清除缓存中其对应的价格数据
+     *
      * @param skuId
      */
     public void deletePriceFromRedisBySkuId(String skuId);
