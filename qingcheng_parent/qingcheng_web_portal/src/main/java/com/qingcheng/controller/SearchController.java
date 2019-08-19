@@ -48,7 +48,7 @@ public class SearchController {
         // 字符集处理：get方式传参的乱码问题
         searchMap = WebUtil.convertCharsetToUTF8(searchMap);
 
-        // 获取查询结果
+        // 查询结果
         Map resultMap = skuSearchService.keywordsSearch(searchMap);
         // model对象中添加数据
         model.addAttribute("resultMap", resultMap);
@@ -67,5 +67,27 @@ public class SearchController {
         // 返回结果，并跳转页面
         return "search";//页面跳转，跳转到search.html页面
         //return resultMap; // 配合@ResponseBody注解使用，同时方法返回类型要改为Map
+    }
+
+    //----------测试上面的search()方法之用----------------------
+    @GetMapping("/search1")
+    @ResponseBody //网页请求，返回数据，添加此注解，做测试用，查看能够成功返回数据
+    public Map search1(Model model, @RequestParam Map<String, String> searchMap) throws Exception {
+        searchMap = WebUtil.convertCharsetToUTF8(searchMap);
+
+        // 商品列表展示
+        Map resultMap = skuSearchService.keywordsSearch(searchMap);
+        model.addAttribute("resultMap", resultMap);
+
+        // url处理
+        StringBuffer url = new StringBuffer("/search.do?");
+        Set<String> keySet = searchMap.keySet();
+        for (String key : keySet) {
+            url.append("&" + key + "=" + searchMap.get(key));
+        }
+        model.addAttribute("url", url);
+
+        model.addAttribute("searchMap",searchMap);
+        return resultMap; // 配合@ResponseBody注解使用，同时方法返回类型要改为Map
     }
 }

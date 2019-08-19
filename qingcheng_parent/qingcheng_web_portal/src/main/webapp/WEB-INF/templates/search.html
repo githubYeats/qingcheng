@@ -616,34 +616,30 @@
                 <div class="fl key">商品分类</div>
                 <div class="fl value" th:each="category:${resultMap.categoryNameList}">
                     <span>
-                       <a th:href="${url+'&category='+category}" th:text="${category}">手机</a>
+                       <a th:href="${url+'&category='+category}" th:text="${category}">分类名称</a>
                     </span>
                 </div>
                 <div class="fl ext"></div>
             </div>
 
+            <!--品牌-->
             <div class="type-wrap logo">
                 <div class="fl key brand">品牌</div>
                 <div class="value logos">
                     <ul class="logo-list">
-                        <li>索尼（SONY）</li>
-                        <li>TCL</li>
-                        <li>长虹（CHANGHONG）</li>
-                        <li>飞利浦（PHILIPS）</li>
-                        <li>风行电视</li>
-                        <li><img src="./img/_/phone06.png"/></li>
-                        <li><img src="./img/_/phone07.png"/></li>
-                        <li><img src="./img/_/phone08.png"/></li>
-                        <li><img src="./img/_/phone09.png"/></li>
-                        <li><img src="./img/_/phone10.png"/></li>
-                        <li><img src="./img/_/phone11.png"/></li>
-                        <li><img src="./img/_/phone12.png"/></li>
-                        <li><img src="./img/_/phone12.png"/></li>
-                        <li><img src="./img/_/phone14.png"/></li>
-                        <li><img src="./img/_/phone01.png"/></li>
-                        <li><img src="./img/_/phone06.png"/></li>
-                        <li><img src="./img/_/phone07.png"/></li>
-                        <li><img src="./img/_/phone02.png"/></li>
+                        <li th:each="brand:${resultMap.brandList}">
+                            <!--
+                            品牌信息在数据库中存在两种情况：
+                                （1）有标题，有图片。     显示图片  tb_brand表，image字段
+                                （2）有标题，无图片。     显示文字  tb_brand表，name字段
+                            -->
+                            <a th:href="${url+'&brand='+brand.name}">
+                                <!--品牌图片  数据库中品牌图片不为空，即有图片，那么显示图片-->
+                                <img th:if="${brand.image}!=''" th:src="${brand.image}"/>
+                                <!--品牌名称文字  数据库中品牌图片为空，无图片时，就显示品牌文字名称-->
+                                <span th:if="${brand.image}==''" th:text="${brand.name}">品牌名称</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="ext">
@@ -651,6 +647,8 @@
                     <a href="javascript:void(0);">更多</a>
                 </div>
             </div>
+
+            <!--网络制式-->
             <div class="type-wrap">
                 <div class="fl key">网络制式</div>
                 <div class="fl value">
@@ -689,6 +687,8 @@
                 </div>
                 <div class="fl ext"></div>
             </div>
+
+            <!--显示屏尺寸-->
             <div class="type-wrap">
                 <div class="fl key">显示屏尺寸</div>
                 <div class="fl value">
@@ -703,6 +703,8 @@
                 </div>
                 <div class="fl ext"></div>
             </div>
+
+            <!--摄像头像素-->
             <div class="type-wrap">
                 <div class="fl key">摄像头像素</div>
                 <div class="fl value">
@@ -726,6 +728,8 @@
                 </div>
                 <div class="fl ext"></div>
             </div>
+
+            <!--价格-->
             <div class="type-wrap">
                 <div class="fl key">价格</div>
                 <div class="fl value">
@@ -753,6 +757,8 @@
                 <div class="fl ext">
                 </div>
             </div>
+
+            <!--更多筛选项-->
             <div class="type-wrap">
                 <div class="fl key">更多筛选项</div>
                 <div class="fl value">
@@ -778,6 +784,7 @@
                 </div>
             </div>
         </div>
+
         <!--details-->
         <div class="details">
             <div class="sui-navbar">
@@ -801,9 +808,10 @@
                     </ul>
                 </div>
             </div>
+
+            <!--商品展示  begin-->
             <div class="goods-list">
                 <ul class="yui3-g">
-                    <!--商品展示  begin-->
                     <li class="yui3-u-1-5" th:each="sku:${resultMap.skuList}">
                         <!--<li class="yui3-u-1-5" th:each="sku:${resultMap.get('skuList')}">-->
                         <div class="list-wrap">
@@ -833,9 +841,10 @@
                             </div>
                         </div>
                     </li>
-                    <!--商品展示  end-->
                 </ul>
             </div>
+            <!--商品展示  end-->
+
             <div class="fr page">
                 <div class="sui-pagination pagination-large">
                     <ul>
@@ -869,6 +878,7 @@
                 </div>
             </div>
         </div>
+
         <!--hotsale-->
         <div class="clearfix hot-sale">
             <h4 class="title">热卖商品</h4>

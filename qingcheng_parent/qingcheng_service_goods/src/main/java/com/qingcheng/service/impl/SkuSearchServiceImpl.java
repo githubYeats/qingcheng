@@ -1,6 +1,7 @@
 package com.qingcheng.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.qingcheng.dao.BrandMapper;
 import com.qingcheng.service.goods.SkuSearchService;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -46,6 +47,9 @@ public class SkuSearchServiceImpl implements SkuSearchService {
 
     @Autowired
     private RestHighLevelClient restHighLevelClient;
+
+    @Autowired
+    private BrandMapper brandMapper;
 
 
     /**
@@ -96,7 +100,11 @@ public class SkuSearchServiceImpl implements SkuSearchService {
             boolQueryBuilder.filter(termQueryBuilder);
         }
 
-
+        // 品牌过滤查询
+        if (null != searchMap.get("brand")) {// 搜索条件不为空时，再执行
+            TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("brandName", searchMap.get("brand"));
+            boolQueryBuilder.filter(termQueryBuilder);
+        }
 
         // 聚合查询 ，统计关键字查询结果中有哪些商品分类
         TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("sku_category").field("categoryName");
@@ -132,6 +140,19 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         }
         resultMap.put("categoryNameList", categoryNameList);
 
+        // --------品牌列表信息封装--------------
+        // 查询某一商品分类下的所有品牌信息
+        String categoryName = "";
+        // 前置条件判断
+        if (searchMap.get("category") == null) {// 用户没有点击分类名称时
+            if (categoryNameList.size() > 0) {//有分类时
+                categoryName = categoryNameList.get(0);
+            }
+        } else {//用户点击了某一商品分类时
+            categoryName = searchMap.get("category");
+        }
+        List<Map> brandList = brandMapper.findBrandNameAndImageByCategoryName(categoryName);
+        resultMap.put("brandList", brandList);
 
         // 返回查询结果
         return resultMap;
