@@ -59,7 +59,8 @@
                             <form action="/search.do" class="sui-form form-inline">
                                 <!--searchAutoComplete-->
                                 <div class="input-append">
-                                    <input name="keywords" type="text" id="autocomplete" class="input-error input-xxlarge"/>
+                                    <input name="keywords" type="text" id="autocomplete"
+                                           class="input-error input-xxlarge"/>
                                     <button class="sui-btn btn-xlarge btn-danger">搜索</button>
                                 </div>
                             </form>
@@ -790,7 +791,7 @@
                 <ul class="yui3-g">
                     <!--商品展示  begin-->
                     <li class="yui3-u-1-5" th:each="sku:${resultMap.skuList}">
-                    <!--<li class="yui3-u-1-5" th:each="sku:${resultMap.get('skuList')}">-->
+                        <!--<li class="yui3-u-1-5" th:each="sku:${resultMap.get('skuList')}">-->
                         <div class="list-wrap">
                             <div class="p-img">
                                 <img th:src="${sku.image}"/>
