@@ -584,7 +584,7 @@
 <!--list-content-->
 <div class="main">
     <div class="py-container">
-        <!--bread-->
+        <!--筛选条件  begin-->
         <div class="bread">
             <ul class="fl sui-breadcrumb">
                 <li>
@@ -592,22 +592,36 @@
                 </li>
             </ul>
             <ul class="fl sui-tag">
-                <li class="with-x">iphone<i>×</i></li>
-                <li class="with-x">华为<i>×</i></li>
-                <li class="with-x">OPPO<i>×</i></li>
+                <!--判断：当查询条件中有商品分类时（即点击了某个分类项），筛选条件处就将商品分类的条件添加进来-->
+                <li class="with-x" th:if="${#maps.containsKey(searchMap,'category')}">
+                    <span th:text="${'商品分类：'+ searchMap.category}"></span>
+                    <i>
+                        <!--点击叉号，将URL中的对应的商品分类的条件去掉-->
+                        <a th:href="${#strings.replace(url,'&category='+searchMap.category,'')}">×</a>
+                    </i>
+                </li>
             </ul>
         </div>
+        <!--筛选条件  end-->
+
         <!--selector-->
         <div class="clearfix selector">
-            <div class="type-wrap">
+            <!--商品分类-->
+            <!--当点击一个商品名称时，过滤面板上的“商品分类”项就给隐藏起来。
+                如果点击了商品分类，就显示所点击的分类商品，商品分类栏就不用显示了；
+                （因为这是第3级分类，一次只能显示一种分类产品）
+                。。没点击某个商品分类，那就需要显示商品分类栏
+            -->
+            <div class="type-wrap" th:if="!${#maps.containsKey(searchMap,'category')}">
                 <div class="fl key">商品分类</div>
-                <div class="fl value">
-						<span>
-							<a href="">手机</a>  <a href="">电视</a>
-						</span>
+                <div class="fl value" th:each="category:${resultMap.categoryNameList}">
+                    <span>
+                       <a th:href="${url+'&category='+category}" th:text="${category}">手机</a>
+                    </span>
                 </div>
                 <div class="fl ext"></div>
             </div>
+
             <div class="type-wrap logo">
                 <div class="fl key brand">品牌</div>
                 <div class="value logos">

@@ -9,8 +9,14 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,9 +86,22 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         // 搜索条件构建   keywords是前后端约定的，前端输入的查询"关键字"
         MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("name", searchMap.get("keywords"));
         boolQueryBuilder.must(matchQueryBuilder);// "与" 查询
-        // 查询
+        // 关键字匹配查询
         searchSourceBuilder.query(boolQueryBuilder);
         searchRequest.source(searchSourceBuilder);
+
+        // 商品分类过滤查询
+        if (null != searchMap.get("category")) {// 搜索条件不为空时，再执行
+            TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("categoryName", searchMap.get("category"));
+            boolQueryBuilder.filter(termQueryBuilder);
+        }
+
+
+
+        // 聚合查询 ，统计关键字查询结果中有哪些商品分类
+        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("sku_category").field("categoryName");
+        searchSourceBuilder.aggregation(aggregationBuilder);
+
 
         //==================================封装查询结果 ===================================
         //--------从elasticsearch中查询数据--------
@@ -95,11 +114,24 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         //遍历查询结果集
         for (SearchHit hit : hits) {
             Map<String, Object> skuMap = hit.getSourceAsMap(); // 查询到的一个一个sku
-            System.out.println(skuMap);
+            //System.out.println(skuMap);
             // 存入skuList
             skuList.add(skuMap);
         }
         resultMap.put("skuList", skuList);
+
+        // --------商品分类信息封装---------
+        Aggregations aggregations = searchResponse.getAggregations();
+        Map<String, Aggregation> aggregationMap = aggregations.getAsMap();
+        Terms terms = (Terms) aggregationMap.get("sku_category");
+        List<? extends Terms.Bucket> buckets = terms.getBuckets();
+        List<String> categoryNameList = new ArrayList<>();// 存放聚合查询得出的商品分类信息
+        for (Terms.Bucket bucket : buckets) {
+            String key = bucket.getKeyAsString();// 商品分类名称
+            categoryNameList.add(key);
+        }
+        resultMap.put("categoryNameList", categoryNameList);
+
 
         // 返回查询结果
         return resultMap;
