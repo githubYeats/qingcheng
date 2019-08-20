@@ -2,6 +2,7 @@ package com.qingcheng.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.qingcheng.dao.BrandMapper;
+import com.qingcheng.dao.SpecMapper;
 import com.qingcheng.service.goods.SkuSearchService;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -45,11 +46,23 @@ public class SkuSearchServiceImpl implements SkuSearchService {
      */
 
 
+    /**
+     * es高级客户端
+     */
     @Autowired
     private RestHighLevelClient restHighLevelClient;
 
+    /**
+     * 品牌过滤搜索时使用
+     */
     @Autowired
     private BrandMapper brandMapper;
+
+    /**
+     * 规格过滤搜索时使用
+     */
+    @Autowired
+    private SpecMapper specMapper;
 
 
     /**
@@ -86,25 +99,41 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         // 创建查询构建器
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();// bool查询构建器
 
-        //----------------------------------关键字搜索-----------------------------------
+        // 关键字搜索
         // 搜索条件构建   keywords是前后端约定的，前端输入的查询"关键字"
         MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("name", searchMap.get("keywords"));
         boolQueryBuilder.must(matchQueryBuilder);// "与" 查询
-        // 关键字匹配查询
-        searchSourceBuilder.query(boolQueryBuilder);
-        searchRequest.source(searchSourceBuilder);
 
-        // 商品分类过滤查询
+        // 商品分类过滤
         if (null != searchMap.get("category")) {// 搜索条件不为空时，再执行
             TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("categoryName", searchMap.get("category"));
             boolQueryBuilder.filter(termQueryBuilder);
         }
 
-        // 品牌过滤查询
+        // 品牌过滤
         if (null != searchMap.get("brand")) {// 搜索条件不为空时，再执行
             TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("brandName", searchMap.get("brand"));
             boolQueryBuilder.filter(termQueryBuilder);
         }
+
+        // 规格过滤
+        if (null != searchMap.get("spec")) {// 搜索条件不为空时，再执行
+            for(String key:searchMap.keySet()){
+                // 前后端约定：所有spec.开头的参数才是规格
+                if(key.startsWith("spec.")){
+                    /*
+                    (1)是规格参数，再进行查询
+                    (2)termQuery(key+".keyword", searchMap.get(key))，需要给key加上“.keyword”，是es中对于object类型的字段
+                        进行精确查询所要求的。  es中keyword类型的数据可以进行精确查询
+                     */
+                    TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery(key+".keyword", searchMap.get(key));
+                    boolQueryBuilder.filter(termQueryBuilder);
+                }
+            }
+        }
+
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchRequest.source(searchSourceBuilder);
 
         // 聚合查询 ，统计关键字查询结果中有哪些商品分类
         TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("sku_category").field("categoryName");
@@ -128,7 +157,7 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         }
         resultMap.put("skuList", skuList);
 
-        // --------商品分类信息封装---------
+        // --------商品分类列表---------
         Aggregations aggregations = searchResponse.getAggregations();
         Map<String, Aggregation> aggregationMap = aggregations.getAsMap();
         Terms terms = (Terms) aggregationMap.get("sku_category");
@@ -140,8 +169,7 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         }
         resultMap.put("categoryNameList", categoryNameList);
 
-        // --------品牌列表信息封装--------------
-        // 查询某一商品分类下的所有品牌信息
+        // 商品分类名称构建（品牌过滤/规格过滤/价格过滤，都要用到此名称作为查询条件）
         String categoryName = "";
         // 前置条件判断
         if (searchMap.get("category") == null) {// 用户没有点击分类名称时
@@ -151,8 +179,30 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         } else {//用户点击了某一商品分类时
             categoryName = searchMap.get("category");
         }
-        List<Map> brandList = brandMapper.findBrandNameAndImageByCategoryName(categoryName);
-        resultMap.put("brandList", brandList);
+
+        // --------品牌列表-------------
+        // 查询某一商品分类下的所有品牌信息
+        if (null == searchMap.get("brand")) {// 没有品牌过滤条件时，再执行
+
+            List<Map> brandList = brandMapper.findBrandByCategoryName(categoryName);
+            resultMap.put("brandList", brandList);
+        }
+
+        //--------规格列表------------------
+        // 查询某一商品分类的规格信息
+        if (null == searchMap.get("spec")) {
+            List<Map> specList = specMapper.findSpecByCategoryName(categoryName);
+            // spec是一个对象，options值格式为：20英寸,50英寸,60英寸。需要将其处理成map，这样前端才能取值
+            for (Map spec : specList) {
+               /* String options = (String) spec.get("options");
+                String[] stringArr = options.split(",");
+                spec.put("options", stringArr);// 覆盖原先的逗号分隔的字符串数据*/
+                String[] stringArr= ((String) spec.get("options")).split(",");
+                spec.put("options", stringArr);
+
+            }
+            resultMap.put("specList", specList);
+        }
 
         // 返回查询结果
         return resultMap;

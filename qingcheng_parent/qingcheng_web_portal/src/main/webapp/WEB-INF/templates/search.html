@@ -592,12 +592,52 @@
                 </li>
             </ul>
             <ul class="fl sui-tag">
+                <!--商品分类过滤条件-->
                 <!--判断：当查询条件中有商品分类时（即点击了某个分类项），筛选条件处就将商品分类的条件添加进来-->
                 <li class="with-x" th:if="${#maps.containsKey(searchMap,'category')}">
                     <span th:text="${'商品分类：'+ searchMap.category}"></span>
                     <i>
-                        <!--点击叉号，将URL中的对应的商品分类的条件去掉-->
+                        <!--点击叉号，将URL中的对应的商品分类过滤条件去掉
+                        其思路就是将请求URL中的条件去掉一个：
+                            http://localhost:9102/search1.do?keywords=华为&category=手机
+                            目标就是后面的“&category=手机”给去掉，形成新的URL,如下：
+                            http://localhost:9102/search1.do?keywords=华为
+                        -->
                         <a th:href="${#strings.replace(url,'&category='+searchMap.category,'')}">×</a>
+                    </i>
+                </li>
+
+                <!--品牌过滤条件-->
+                <li class="with-x" th:if="${#maps.containsKey(searchMap,'brand')}">
+                    <span th:text="${'品牌：'+ searchMap.brand}"></span>
+                    <i>
+                        <!--点击叉号，将URL中的对应的品牌过滤条件去掉-->
+                        <a th:href="${#strings.replace(url,'&brand='+searchMap.brand,'')}">×</a>
+                    </i>
+                </li>
+
+                <!--规格过滤条件-->
+                <!--
+                item:${searchMap}   这是将searchMap中的所有条件都进行循环，包括了商品分类/品牌，但需要判断是“规格”参数的才要进行循环
+                -->
+                <li class="with-x" th:each="item:${searchMap}" th:if="${#strings.startsWith(item.key,'spec.')}">
+                    <!--
+                    一个完整的规格过滤条件为：  spec.显示屏尺寸=5.5寸
+                    （点击后，会添加到请求URL中的过滤条件，形成 &spec.显示屏尺寸=5.5寸）
+                    这就是一个item对象，item.key=spec.显示屏尺寸    item.value=5.5寸
+
+                    “规格项名称”需要的就是item.key中“spec.”后面的值“显示屏尺寸”
+                        #strings.substring()  这个函数的源码，就是JDK中String内的代码
+                            public String substring(final Object target, final int start)
+                        substring(item.key,5)，截取“spec.显示屏尺寸”，从index=5的位置开始，截取到最后，其值就为“显示屏尺寸”
+                    -->
+                    <span th:text="${#strings.substring(item.key,5) +':'+ item.value}">规格项名称</span>
+                    <i>
+                        <!--点击叉号，将URL中的对应的规格过滤条件去掉
+                        原请求URL：http://localhost:9102/search.do?&keywords=手机&spec.显示屏尺寸=5.5寸&brand=OPPO&category=手机
+                        新URL：http://localhost:9102/search.do?&keywords=手机&brand=OPPO&category=手机
+                        -->
+                        <a th:href="${#strings.replace(url,'&'+ item.key+'='+item.value,'')}">×</a>
                     </i>
                 </li>
             </ul>
@@ -606,13 +646,13 @@
 
         <!--selector-->
         <div class="clearfix selector">
-            <!--商品分类-->
+            <!--商品分类列表-->
             <!--当点击一个商品名称时，过滤面板上的“商品分类”项就给隐藏起来。
                 如果点击了商品分类，就显示所点击的分类商品，商品分类栏就不用显示了；
                 （因为这是第3级分类，一次只能显示一种分类产品）
                 。。没点击某个商品分类，那就需要显示商品分类栏
             -->
-            <div class="type-wrap" th:if="!${#maps.containsKey(searchMap,'category')}">
+            <div class="type-wrap" th:if="${!#maps.containsKey(searchMap,'category')}">
                 <div class="fl key">商品分类</div>
                 <div class="fl value" th:each="category:${resultMap.categoryNameList}">
                     <span>
@@ -622,8 +662,9 @@
                 <div class="fl ext"></div>
             </div>
 
-            <!--品牌-->
-            <div class="type-wrap logo">
+            <!--品牌列表-->
+            <!--查询条件中没有brand条件，再显示。如果有了，就相当于已经选择了品牌条件，此时隐藏品牌栏-->
+            <div class="type-wrap logo" th:if="${!#maps.containsKey(searchMap,'brand')}">
                 <div class="fl key brand">品牌</div>
                 <div class="value logos">
                     <ul class="logo-list">
@@ -648,114 +689,17 @@
                 </div>
             </div>
 
-            <!--网络制式-->
-            <div class="type-wrap">
-                <div class="fl key">网络制式</div>
+            <!--规格列表-->
+            <div class="type-wrap" th:each="spec:${resultMap.specList}" th:if="${!#maps.containsKey(searchMap,'spec.'+spec.name)}">
+                <div class="fl key" th:text="${spec.name}">规格名称</div>
                 <div class="fl value">
                     <ul class="type-list">
-                        <li>
-                            <a>GSM（移动/联通2G）</a>
-                        </li>
-                        <li>
-                            <a>电信2G</a>
-                        </li>
-                        <li>
-                            <a>电信3G</a>
-                        </li>
-                        <li>
-                            <a>移动3G</a>
-                        </li>
-                        <li>
-                            <a>联通3G</a>
-                        </li>
-                        <li>
-                            <a>联通4G</a>
-                        </li>
-                        <li>
-                            <a>电信3G</a>
-                        </li>
-                        <li>
-                            <a>移动3G</a>
-                        </li>
-                        <li>
-                            <a>联通3G</a>
-                        </li>
-                        <li>
-                            <a>联通4G</a>
+                        <li th:each="option:${spec.options}">
+                            <a th:href="${url+'&spec.'+spec.name+'='+option}" th:text="${option}">GSM（移动/联通2G）</a>
                         </li>
                     </ul>
                 </div>
                 <div class="fl ext"></div>
-            </div>
-
-            <!--显示屏尺寸-->
-            <div class="type-wrap">
-                <div class="fl key">显示屏尺寸</div>
-                <div class="fl value">
-                    <ul class="type-list">
-                        <li>
-                            <a>4.0-4.9英寸</a>
-                        </li>
-                        <li>
-                            <a>4.0-4.9英寸</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="fl ext"></div>
-            </div>
-
-            <!--摄像头像素-->
-            <div class="type-wrap">
-                <div class="fl key">摄像头像素</div>
-                <div class="fl value">
-                    <ul class="type-list">
-                        <li>
-                            <a>1200万以上</a>
-                        </li>
-                        <li>
-                            <a>800-1199万</a>
-                        </li>
-                        <li>
-                            <a>1200-1599万</a>
-                        </li>
-                        <li>
-                            <a>1600万以上</a>
-                        </li>
-                        <li>
-                            <a>无摄像头</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="fl ext"></div>
-            </div>
-
-            <!--价格-->
-            <div class="type-wrap">
-                <div class="fl key">价格</div>
-                <div class="fl value">
-                    <ul class="type-list">
-                        <li>
-                            <a>0-500元</a>
-                        </li>
-                        <li>
-                            <a>500-1000元</a>
-                        </li>
-                        <li>
-                            <a>1000-1500元</a>
-                        </li>
-                        <li>
-                            <a>1500-2000元</a>
-                        </li>
-                        <li>
-                            <a>2000-3000元 </a>
-                        </li>
-                        <li>
-                            <a>3000元以上</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="fl ext">
-                </div>
             </div>
 
             <!--更多筛选项-->
