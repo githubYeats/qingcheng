@@ -1,9 +1,9 @@
 package com.qingcheng.controller;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.system.LoginLog;
 import com.qingcheng.service.system.LoginLogService;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,8 @@ import java.util.Map;
 @RequestMapping("/login")
 public class LoginController {
 
-    @Reference
+
+    @Reference //dubbo注解，从注册中心获取服务
     private LoginLogService loginLogService;
 
     /**

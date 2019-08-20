@@ -8,10 +8,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -118,17 +115,47 @@ public class SkuSearchServiceImpl implements SkuSearchService {
 
         // 规格过滤
         if (null != searchMap.get("spec")) {// 搜索条件不为空时，再执行
-            for(String key:searchMap.keySet()){
+            for (String key : searchMap.keySet()) {
                 // 前后端约定：所有spec.开头的参数才是规格
-                if(key.startsWith("spec.")){
+                if (key.startsWith("spec.")) {
                     /*
                     (1)是规格参数，再进行查询
                     (2)termQuery(key+".keyword", searchMap.get(key))，需要给key加上“.keyword”，是es中对于object类型的字段
                         进行精确查询所要求的。  es中keyword类型的数据可以进行精确查询
                      */
-                    TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery(key+".keyword", searchMap.get(key));
+                    TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery(key + ".keyword", searchMap.get(key));
                     boolQueryBuilder.filter(termQueryBuilder);
                 }
+            }
+        }
+
+        // 价格过滤
+        /*
+        价格区间
+            0-499 500-999 1000-1699 1700-2799 2800-4499 4500-11999 12000-*
+         */
+        if (null != searchMap.get("price")) {// 有价格过滤条件时，再执行过滤
+            String[] prices = searchMap.get("price").split("-");// price=2800-4499  [价格下限，价格上限]
+
+            // 下限不为0，即0-499区间之外的其他区间。
+            /*
+            下限不为0，即有下限，此时需要查询条件设置下限，即要"大于等于"下限
+                0就不是价格下限了吗？
+                    商品的价格不会比0还小，甚至等于0的可能都几乎没有，不然商家尽亏本了。
+             */
+            if (!prices[0].equals("0")) {
+                // 前端传递过来的价格，单位是“元”。后台查询出来的价格单位是“分”。   需要保持前后端一致才可以。
+                RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("price").gte(prices[0] + "00");
+                boolQueryBuilder.filter(rangeQueryBuilder);
+            }
+
+            // 上限不为*，即12000-*区间之外的其他区间
+            /*
+            上限不为*，即有价格上限，要为过滤条件设置价格上限。
+             */
+            if (!prices[1].equals("*")) {
+                RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("price").lte(prices[1] + "00");
+                boolQueryBuilder.filter(rangeQueryBuilder);
             }
         }
 
@@ -197,7 +224,7 @@ public class SkuSearchServiceImpl implements SkuSearchService {
                /* String options = (String) spec.get("options");
                 String[] stringArr = options.split(",");
                 spec.put("options", stringArr);// 覆盖原先的逗号分隔的字符串数据*/
-                String[] stringArr= ((String) spec.get("options")).split(",");
+                String[] stringArr = ((String) spec.get("options")).split(",");
                 spec.put("options", stringArr);
 
             }

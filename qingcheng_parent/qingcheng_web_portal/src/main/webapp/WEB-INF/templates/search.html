@@ -640,11 +640,20 @@
                         <a th:href="${#strings.replace(url,'&'+ item.key+'='+item.value,'')}">×</a>
                     </i>
                 </li>
+
+                <!--价格过滤条件-->
+                <li class="with-x" th:if="${#maps.containsKey(searchMap,'price')}">
+                    <span th:text="${'价格：'+ searchMap.price}"></span>
+                    <i>
+                        <!--点击叉号，将URL中的对应的品牌过滤条件去掉-->
+                        <a th:href="${#strings.replace(url,'&price='+searchMap.price,'')}">×</a>
+                    </i>
+                </li>
             </ul>
         </div>
         <!--筛选条件  end-->
 
-        <!--selector-->
+        <!--过滤面板  begin-->
         <div class="clearfix selector">
             <!--商品分类列表-->
             <!--当点击一个商品名称时，过滤面板上的“商品分类”项就给隐藏起来。
@@ -702,6 +711,42 @@
                 <div class="fl ext"></div>
             </div>
 
+            <!--价格区间列表
+            0-499 500-999 1000-1699 1700-2799 2800-4499 4500-11999 12000以上
+            -->
+            <div class="type-wrap" th:if="${!#maps.containsKey(searchMap,'price')}">
+                <div class="fl key">价格</div>
+                <div class="fl value">
+                    <ul class="type-list">
+                        <li>
+                            <a th:href="${url+'&price=0-499'}">0-499元</a>
+                        </li>
+                        <li>
+                            <a th:href="${url+'&price=500-999'}">500-999元</a>
+                        </li>
+                        <li>
+                            <a th:href="${url+'&price=1000-1699'}">1000-1699元</a>
+                        </li>
+                        <li>
+                            <a th:href="${url+'&price=1700-2799'}">1700-2799元</a>
+                        </li>
+                        <li>
+                            <a th:href="${url+'&price=2800-4499'}">2800-4499元 </a>
+                        </li>
+                        <li>
+                            <a th:href="${url+'&price=4500-11999'}">4500-11999</a>
+                        </li>
+                        <li>
+                            <!--以*号来代表上限，后台接收参数后，如果price中有*号，代表要筛选的价格无上限-->
+                            <a th:href="${url+'&price=12000-*'}">12000以上</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="fl ext">
+                </div>
+            </div>
+
+
             <!--更多筛选项-->
             <div class="type-wrap">
                 <div class="fl key">更多筛选项</div>
@@ -728,7 +773,7 @@
                 </div>
             </div>
         </div>
-
+        <!--过滤面板  end-->
         <!--details-->
         <div class="details">
             <div class="sui-navbar">
