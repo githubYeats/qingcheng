@@ -84,8 +84,8 @@ public class SkuSearchServiceImpl implements SkuSearchService {
          */
 
         // 创建最外层Map，用来查询结果的返回
-        Map<String, List> resultMap = new HashMap<String, List>();
-//        Map resultMap = new HashMap();
+        //Map<String, List> resultMap = new HashMap<String, List>();
+        Map resultMap = new HashMap();//它可以存放更为丰富的内容，或者把泛型中的List改变成Object
 
 
         // ================================封装请求对象====================================
@@ -158,8 +158,36 @@ public class SkuSearchServiceImpl implements SkuSearchService {
                 boolQueryBuilder.filter(rangeQueryBuilder);
             }
         }
-
         searchSourceBuilder.query(boolQueryBuilder);
+        //-----------以上内容，相当于构建起elasticsearch中查询语法里的“query”--------------
+        /*
+        # 过滤查询 filter
+        GET /sku/doc/_search
+        {
+          "query": {
+            "bool": {
+              "filter":{
+                 "match": {
+                    "brandName": "华为"
+                }
+              }
+            }
+          },
+          "from": 5,
+          "size": 2
+        }
+         */
+        //-----------------------------------------------------------------------------
+
+        //###################################################################
+
+        // 分页查询
+        int pageNo = Integer.parseInt(searchMap.get("pageNo"));
+        int pageSize = 10; // 自已设置
+        int startIndex = (pageNo - 1) * pageSize;
+        searchSourceBuilder.from(startIndex);
+        searchSourceBuilder.size(pageSize);
+
         searchRequest.source(searchSourceBuilder);
 
         // 聚合查询 ，统计关键字查询结果中有哪些商品分类
@@ -231,7 +259,41 @@ public class SkuSearchServiceImpl implements SkuSearchService {
             resultMap.put("specList", specList);
         }
 
-        // 返回查询结果
+        //-------分页查询之“分页条页码渲染”------------
+        /*
+        服务器端要通过前端传递的当前页面pageNo，进行查询，将总页数返回给模板页面。
+        然后模板页面，借助总页数，来对分页条的页码进行渲染！
+
+        后台根据什么来计算出搜索结果应该展示的“总页数”呢？
+            总页数 =  function(总记录条数, 每页记录数)。
+                总记录条数，是elasticsearch中查询出来的；
+                每页记录数，这是自己设置的。
+         */
+        long totalCount = totalHits; // long totalHits = searchHits.getTotalHits();//总文档数
+        long totalPages = (totalCount % pageSize == 0) ? totalCount / pageSize : (totalCount / pageSize + 1);
+        resultMap.put("totalPages", totalPages); // 存到resultMap中，给前端传递
+
+        //-------------分页显示之“分页条数字页码显示范围控制”------------------------
+        Map pageMap = new HashMap();
+        long startPage = 1;
+        long endPage = totalPages;
+        // 条件判断
+        if (totalPages > 5) {
+            startPage = pageNo - 2;
+            /*
+            减去2后小于1，说明是第1/2/3页。
+            如果当前页是第1/2/3页，那当前页码前面只有2页或小于2页，开始页自然应该是第1页。
+             */
+            if (startPage < 1) {
+                startPage = 1;
+            }
+            endPage = pageNo + 2;
+        }
+        pageMap.put("startPage", startPage);
+        pageMap.put("endPage", endPage);
+        resultMap.put("pageMap", pageMap);
+
+        // 返回查询结果给web层的controller
         return resultMap;
     }
 }
