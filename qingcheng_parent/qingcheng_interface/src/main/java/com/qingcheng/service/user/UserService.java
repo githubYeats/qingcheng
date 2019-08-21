@@ -32,4 +32,10 @@ public interface UserService {
 
     public void delete(String username);
 
+    /**
+     * 发送短信验证码
+     * @param phone 注册用户填写的手机号码（短信接收者的手机号码）
+     */
+    public void sendMsg(String phone);
+
 }
