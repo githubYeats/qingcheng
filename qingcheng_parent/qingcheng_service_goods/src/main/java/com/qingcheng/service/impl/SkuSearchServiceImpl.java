@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -17,6 +18,9 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -159,27 +163,24 @@ public class SkuSearchServiceImpl implements SkuSearchService {
             }
         }
         searchSourceBuilder.query(boolQueryBuilder);
-        //-----------以上内容，相当于构建起elasticsearch中查询语法里的“query”--------------
-        /*
-        # 过滤查询 filter
-        GET /sku/doc/_search
-        {
-          "query": {
-            "bool": {
-              "filter":{
-                 "match": {
-                    "brandName": "华为"
+        /*-----------以上内容，相当于构建起elasticsearch中查询语法里的“query”--------------
+            # 过滤查询 filter
+            GET /sku/doc/_search
+            {
+              "query": {
+                "bool": {
+                  "filter":{
+                     "match": {
+                        "brandName": "华为"
+                    }
+                  }
                 }
-              }
+              },
+              "from": 5,
+              "size": 2
             }
-          },
-          "from": 5,
-          "size": 2
-        }
          */
         //-----------------------------------------------------------------------------
-
-        //###################################################################
 
         // 分页查询
         int pageNo = Integer.parseInt(searchMap.get("pageNo"));
@@ -188,25 +189,95 @@ public class SkuSearchServiceImpl implements SkuSearchService {
         searchSourceBuilder.from(startIndex);
         searchSourceBuilder.size(pageSize);
 
+        // 搜索结果排序
+        String sortField = searchMap.get("sortField");// 排序字段
+        String order = searchMap.get("order");// 排序规则
+        if (!"".equals(sortField)) {// 不为空字符串时，再进行排序
+            searchSourceBuilder.sort(sortField, SortOrder.valueOf(order));
+        }
+
+        // 搜索关键字高亮
+        /*
+            GET /sku/_search
+            {
+              "query": {
+                "match": {
+                  "name": "三星手机"
+                }
+              },
+              "highlight": {
+                "fields": {
+                  "name": {
+                    "pre_tags": "<font stype='color:red'",
+                    "post_tags": "</font>"
+                  },
+                  "brandName": {}
+                }
+              }
+            }
+
+            查询结果中的高亮对象部分：
+            "highlight" : {
+              "name" : [
+                "<font style='color:red'>三星</font> ....<font stype='color:red'>手机</font> 双卡双待"
+              ]
+        }
+         */
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field("name").preTags("<font style='color:red'>").postTags("</font>");
+        searchSourceBuilder.highlighter(highlightBuilder);
+
+
         searchRequest.source(searchSourceBuilder);
 
         // 聚合查询 ，统计关键字查询结果中有哪些商品分类
         TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("sku_category").field("categoryName");
         searchSourceBuilder.aggregation(aggregationBuilder);
 
+        //上面是封装请求对象
+        //##########################################################################################################
+        //下面是封装查询结果
 
         //==================================封装查询结果 ===================================
         //--------从elasticsearch中查询数据--------
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);// search()方法的异常向上抛
         SearchHits searchHits = searchResponse.getHits();// 查询结果数据
         long totalHits = searchHits.getTotalHits();//总文档数
-        SearchHit[] hits = searchHits.getHits();// 文档列表数组
-        //--------查询结果封装---------------------
+        SearchHit[] hits = searchHits.getHits();// 文档列表数组(里面存放的就是一个一个的es文档，即一条一条数据记录)
+
+        //----------商品列表------------------
         List<Map<String, Object>> skuList = new ArrayList<>();//中间层List
         //遍历查询结果集
-        for (SearchHit hit : hits) {
+        for (SearchHit hit : hits) {// hit:1个es文档（document），即一条一条数据记录。
             Map<String, Object> skuMap = hit.getSourceAsMap(); // 查询到的一个一个sku
             //System.out.println(skuMap);
+
+            //--------添加高亮效果（关键字搜索后，展示出来的商品名称中，对应的关键字要高亮显示）--------
+            /*
+            高亮效果如何添加？ 关键字原来是无格式输出，现在利用es高亮搜索技术，使用带格式的文本输出。
+             */
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            HighlightField name = highlightFields.get("name");// name就是搜索语法中要进行高亮的字段名称
+            // 获取name字段值中需要高亮显示的信息片段
+            /*
+            "highlight" : {
+              "name" : [
+                "<font stype='color:red'>三星</font>。。。。<font stype='color:red'>手机</font> 双卡双待"
+              ]
+             */
+            Text[] fragments = name.fragments();// Text[]数组就对应着hightlight对象的name属性对应的值对象（一个数组）
+            // 用高亮内容替换原无格式的内容
+            /*
+            “原无格式的内容”指什么？-->每一个文档（即hit对象）中name属性值，即一个个sku商品的名称。
+                 Map<String, Object> skuMap = hit.getSourceAsMap(); // 查询到的一个一个sku
+            fragments对象数组中的元素都是Text对象，存回skuMap中时，必须将其转回字符串。
+                如果不加toString()，会报一个错误，说是org.elasticsearch.common.text.Text类必须要去实现序列化接口 Serilizable。
+                    public final class Text implements Comparable<Text>, ToXContentFragment
+                    这是thymeleaf中的类，经过千锤百炼的，既然没有去实现 Serilizable 接口，那肯定人家是没有问题的。
+             */
+            skuMap.put("name",fragments[0].toString());//fragments[0]，从上面可见，fragments数组中只有一个元素。
+
+
             // 存入skuList
             skuList.add(skuMap);
         }

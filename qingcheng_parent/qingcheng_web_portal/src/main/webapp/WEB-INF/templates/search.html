@@ -776,30 +776,62 @@
         </div>
         <!--过滤面板  end-->
 
-
-        <!--details-->
         <div class="details">
+            <!--搜索结果排序  begin-->
             <div class="sui-navbar">
                 <div class="navbar-inner filter">
                     <ul class="sui-nav">
-                        <li class="active">
-                            <a href="#">综合</a>
+
+                        <!--默认按“综合”排序DESC
+                            综合的规则是什么？？？？
+                        -->
+                        <li th:class="${searchMap.sortField==''?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=&order=')}">
+                                综合↓
+                            </a>
                         </li>
-                        <li>
-                            <a href="#">销量</a>
+
+                        <!--
+                            销量，按降序排列
+                            请求参数：?&keywords=手机&sortField=price&order=ASC
+                            点击“销量”，要将&sortField=price&order=ASC更新为新值“&sortField=saleNum&order=DESC”
+                            -->
+                        <li th:class="${searchMap.sortField=='saleNum'?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=saleNum&order=DESC')}">
+                                销量↓
+                            </a>
                         </li>
-                        <li>
-                            <a href="#">新品</a>
+
+                        <li th:class="${searchMap.sortField=='createTime'?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=createTime&order=DESC')}">
+                                新品↓
+                            </a>
                         </li>
-                        <li>
-                            <a href="#">评价</a>
+
+                        <li th:class="${searchMap.sortField=='commentNum'?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=commentNum&order=DESC')}">
+                                评论数↓
+                            </a>
                         </li>
-                        <li>
-                            <a href="#">价格</a>
+
+                        <!--
+                        加上条件 &&searchMap.order=='ASC'，目的是为了区分到底是选择的哪个价格条件。
+                        -->
+                        <li th:class="${searchMap.sortField=='price'&&searchMap.order=='ASC'?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=price&order=ASC')}">
+                                价格↑
+                            </a>
+                        </li>
+
+                        <li th:class="${searchMap.sortField=='price'&&searchMap.order=='DESC'?'active':''}">
+                            <a th:href="${#strings.replace(url,'&sortField='+searchMap.sortField+'&order='+searchMap.order,'&sortField=price&order=DESC')}">
+                                价格↓
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
+            <!--搜索结果排序  end-->
 
             <!--商品展示  begin-->
             <div class="goods-list">
@@ -817,7 +849,17 @@
                                 </strong>
                             </div>
                             <div class="attr">
-                                <a th:text="${sku.name}"
+                                <!--
+                                商品名称
+                                    原先是使用th:text="${sku.name}，这展示的商品名称不带格式的文本名称；
+                                        三星 Galaxy S8+（SM-G9550）6GB+128GB 谜夜黑 移动联通电信4G手机 双卡双待"
+                                    搜索关键字高亮功能中，需要使用th:utext="${sku.name}，utext能够展示富文本信息（即包含html标签的文本内容）
+                                    浏览器会对其中的html标签进行解析，带样式展示文本信息。
+                                        如："<font stype='color:red'>三星</font> 。。。。<font stype='color:red'>手机</font> 双卡双待"
+                                            如果用th:text，那就是文本原样输出（html标签不解析）；
+                                            如果用th:utext，浏览器就会解析其中的html标签，将“三星”和“手机”两处加上html标签赋予其的样式（红色字体）
+                                -->
+                                <a th:utext="${sku.name}"
                                    target="_blank" href="item.html"
                                    title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】">
                                 </a>
@@ -841,8 +883,18 @@
             <div class="fr page">
                 <div class="sui-pagination pagination-large">
                     <ul>
-                        <li class="prev disabled">
-                            <a href="#">«上一页</a>
+                        <li class="prev" th:if="${pageNo>1}">
+                            <!--
+                            上一页：
+                                原页：http://localhost:9102/search.do?keywords=手机&pageNo=10
+                                上页：http://localhost:9102/search.do?keywords=手机&pageNo=9
+                                这里要求的是pageNo-1。
+                                但是searchMap中的pageNo参数是String类型的。  不能直接进行数值运算。
+
+                                解决方案：
+                                    去后台对接收参数pageNo进行转换，转成数值型，再放到Model对象中传给前端。
+                            -->
+                            <a th:href="${#strings.replace(url,'&pageNo=' + pageNo,'&pageNo=' + (pageNo - 1))}">«上一页</a>
                         </li>
 
                         <!--点点点-->
@@ -876,8 +928,9 @@
                             <span>...</span>
                         </li>
 
-                        <li class="next">
-                            <a href="#">下一页»</a>
+                        <!--下一页-->
+                        <li class="next" th:if="${pageNo<resultMap.totalPages}">
+                            <a th:href="${#strings.replace(url,'&pageNo='+pageNo,'&pageNo='+(pageNo+1))}">下一页»</a>
                         </li>
                     </ul>
                     <div>
@@ -889,7 +942,6 @@
                 </div>
             </div>
             <!--分页条  end-->
-
         </div>
 
         <!--热卖商品  begin-->
@@ -977,7 +1029,6 @@
             </div>
         </div>
         <!--热卖商品  end-->
-
     </div>
 </div>
 <!-- 底部栏位 -->

@@ -52,7 +52,16 @@ public class SearchController {
         // 分页查询中，传递的当前页码
         String pageNo = searchMap.get("pageNo");//前端传递数据都是以字符串形式传递的。
         if (null == pageNo || "".equals(pageNo)) {//没传递页码或传递页码为空
-            pageNo = "1";
+            searchMap.put("pageNo", "1");
+        }
+
+        //-----------搜索结果排序----------------
+        // 接受请求参数并做默认处理
+        if (null == searchMap.get("sortField")) {
+            searchMap.put("sortField", "");//排序字段
+        }
+        if (null == searchMap.get("order")) {
+            searchMap.put("order", "DESC");// 排序规则： ASC 升序； DESC 降序
         }
 
         // 调用service层，进行查询
@@ -71,6 +80,9 @@ public class SearchController {
         // 查询条件来自前端，又反传给前端，为了取消“过滤”之用
         model.addAttribute("searchMap", searchMap);
 
+        // 将String类型的pageNo转换成long类型，并返给前端页面
+        model.addAttribute("pageNo", Long.parseLong(searchMap.get("pageNo")));
+
         // 返回结果，并跳转页面       数据通过Model对象传递给前端了
         return "search";//页面跳转，跳转到search.html页面
     }
@@ -78,23 +90,46 @@ public class SearchController {
     //##############################################################################
 
     //----------测试上面的search()方法之用----------------------
-    @GetMapping("/search1")
+    /*@GetMapping("/search1")
     @ResponseBody //网页请求，返回数据，添加此注解，做测试用，查看是否能够成功返回数据
     public Map search1(Model model, @RequestParam Map<String, String> searchMap) throws Exception {
+        // 字符集处理：get方式传参的乱码问题
         searchMap = WebUtil.convertCharsetToUTF8(searchMap);
-        String pageNo = searchMap.get("pageNo");
-        if (null == pageNo || "".equals(pageNo)) {
-            pageNo = "1";
+
+        //-----------请求参数处理--------------
+        // 分页查询中，传递的当前页码
+        String pageNo = searchMap.get("pageNo");//前端传递数据都是以字符串形式传递的。
+        if (null == pageNo || "".equals(pageNo)) {//没传递页码或传递页码为空
+            searchMap.put("pageNo","1");
         }
+
+        //-----------搜索结果排序----------------
+        // 接受请求参数并做默认处理
+        if (null == searchMap.get("sortField")) {
+            searchMap.put("sortField", "");//排序字段
+        }
+        if (null == searchMap.get("order")) {
+            searchMap.put("order", "DESC");// 排序规则： ASC 升序； DESC 降序
+        }
+
+        // 调用service层，进行查询
         Map resultMap = skuSearchService.keywordsSearch(searchMap);
+        // 查询结果添加到model对象中（前端页面就可以取用到此数据了）
         model.addAttribute("resultMap", resultMap);
+
+        // 商品分类过滤中的url处理，点击分类，展示其下的商品数据
         StringBuffer url = new StringBuffer("/search.do?");
         Set<String> keySet = searchMap.keySet();
         for (String key : keySet) {
             url.append("&" + key + "=" + searchMap.get(key));
         }
         model.addAttribute("url", url);
+
+        // 查询条件来自前端，又反传给前端，为了取消“过滤”之用
         model.addAttribute("searchMap", searchMap);
+
+        // 将String类型的pageNo转换成long类型，并返给前端页面
+        model.addAttribute("pageNo", Long.parseLong(searchMap.get("pageNo")));
         return resultMap;
-    }
+    }*/
 }
