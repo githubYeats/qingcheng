@@ -38,4 +38,11 @@ public interface UserService {
      */
     public void sendMsg(String phone);
 
+    /**
+     * 添加用户
+     * @param user  注册用户，存放前端页面上填写的用户信息
+     * @param smsCode   验证码，用户在页面上输入的验证码。
+     */
+    public void addUser(User user, String smsCode);
+
 }

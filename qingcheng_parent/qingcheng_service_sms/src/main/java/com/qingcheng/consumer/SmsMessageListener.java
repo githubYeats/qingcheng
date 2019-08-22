@@ -3,6 +3,8 @@ package com.qingcheng.consumer;
 import com.alibaba.fastjson.JSON;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -21,6 +23,19 @@ AMQP ：Advanced Message Queue，高级消息队列协议。
  */
 public class SmsMessageListener implements MessageListener {
 
+
+    @Autowired
+    private SmsUtil smsUtil;
+
+   /* @Value("${sms.signName}")
+    private String signName;*/
+
+    @Value("${sms.templateCode}")
+    private String templateCode;
+
+    @Value("${sms.templateParam}")
+    private String templateParam;
+
     /**
      * 接收异步消息，打印到控制台
      *
@@ -29,6 +44,21 @@ public class SmsMessageListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
         // 接收消息（网络上传输以字节数据进行）
+        byte[] messageBody = message.getBody();
+        String messageString = new String(messageBody);
+        Map<String, String> messageMap = JSON.parseObject(messageString, Map.class);
+
+        // 提取消息
+        String phone = messageMap.get("phone");
+        String code = messageMap.get("code");
+        System.out.println("手机号:" + phone + ", 验证码:" + code);
+
+        // 发送短消息
+        // SmsUtil工具类   sendSms(String phoneNumbers, String signName, String templateCode, String templateParam)
+        // sms.param={"code":"[value]"}
+        smsUtil.sendSms(phone, templateCode, templateParam.replace("[value]", code));
+
+        /*// 接收消息（网络上传输以字节数据进行）
         byte[] messageBody = message.getBody();
         System.out.println(Arrays.asList(messageBody));
 
@@ -42,6 +72,6 @@ public class SmsMessageListener implements MessageListener {
         // 提取消息
         String phone = messageMap.get("phone");
         String code = messageMap.get("code");
-        System.out.println("手机号:" + phone + ", 验证码:" + code);
+        System.out.println("手机号:" + phone + ", 验证码:" + code);*/
     }
 }

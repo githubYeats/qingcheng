@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -230,6 +227,68 @@ public class UserServiceImpl implements UserService {
         message.put("code", String.valueOf(code));
         //rabbitTemplate.convertAndSend("", "queue.sms", message);
         rabbitTemplate.convertAndSend("", "queue.sms", JSON.toJSONString(message));
+    }
+
+    /**
+     * 添加新用户
+     *
+     * @param user    注册用户，存放前端页面上填写的用户信息
+     * @param smsCode 验证码，用户在页面上输入的验证码。
+     */
+    @Override
+    public void addUser(User user, String smsCode) {
+        // 1 注册信息校对
+        /*// 1.1 用户名校对    默认设置，用户名默认使用手机号
+          // 前端页面都没有提供输入“用户名”的地方 ，哪里来的用户名非空判断
+        if (null == user.getUsername() || "".equals(user.getUsername())) {
+            user.setUsername(user.getPhone());
+        }*/
+        // 1.1 手机号校对：是否已经被注册
+        User newUser = new User();
+        newUser.setUsername(user.getPhone());// 默认使用手机号作为用户名。   页面不提供“用户名”的输入框
+        int selectCount = userMapper.selectCount(newUser);// 统计用户名是user.getPhone()的记录条数
+        if (selectCount > 0) {//有记录，手机号已注册过
+            throw new RuntimeException("该手机号已注册！");
+        }
+        // 1.2 验证码校对
+        String key = "code_" + user.getPhone();
+        String codeInRedis = (String) redisTemplate.boundValueOps(key).get();
+        if (codeInRedis == null) {
+            throw new RuntimeException("未发送验证码或验证码已过期！");
+        }
+        if (!smsCode.equals(codeInRedis)) {
+            throw new RuntimeException("验证码不正确！");
+        }
+        // 1.3 密码校对
+        /*
+        再次输入的密码是否一致，由前端页面自己去校对。只有两次输入的密码相同，点击“注册”才会发送注册信息给后台。
+         */
+
+        // 2 添加用户（to数据库）
+        // 2.1 设置新用户信息  newUser     根据tb_user表来设置
+        // username     主键
+        user.setUsername(user.getPhone());
+        // phone
+        // password     非空      要求加密存储
+        user.setPassword(user.getPassword());
+        // created  非空
+        user.setCreated(new Date());
+        // updated  非空
+        user.setUpdated(new Date());
+        // status       账号状态     0非正常  1正常
+        // 账号状态，应该有很多种，如：正常，禁用，删除，等
+        user.setStatus("1");
+        // is_mobile_check  0未验证    1已验证
+        user.setIsMobileCheck("1");
+        // is_email_check   0未验证    1已验证
+        user.setIsEmailCheck("0");
+        // points   积分  初始积分0
+        user.setPoints(0);
+        // experience_value 经验值 初始值0
+        user.setExperienceValue(0);
+
+        // 2.1 添加用户
+        userMapper.insert(user);
     }
 
 }
