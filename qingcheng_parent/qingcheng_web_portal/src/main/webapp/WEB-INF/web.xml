@@ -22,6 +22,25 @@
         <url-pattern>/*</url-pattern><!--拦截除jsp之外的所有资源请求-->
     </filter-mapping>
 
+    <!--Spring Security配置-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath*:spring-security*.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!--SpringMVC前端控制器：web项目集成SpringMVC框架-->
     <servlet>
         <servlet-name>DispatcherServlet</servlet-name>
