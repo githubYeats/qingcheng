@@ -18,7 +18,7 @@
     <http pattern="/js/**" security="none"/>
     <http pattern="/img/**" security="none"/>
     <!--获取用户名的方法，放行
-        不能这样子配置，因为一时这个username()方法不经过Spring Security了，
+        不能这样配置，因为一旦这个username()方法不经过Spring Security了，
         方法中就不能再用SecurityContextHolder.getContext().getAuthentication().getName()
         去获取登录用户名称了。不管有没有获取得到，都会报错。
 
