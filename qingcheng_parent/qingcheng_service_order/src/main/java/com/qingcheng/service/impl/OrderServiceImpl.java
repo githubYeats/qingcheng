@@ -126,6 +126,10 @@ public class OrderServiceImpl implements OrderService {
             if (searchMap.get("id") != null && !"".equals(searchMap.get("id"))) {
                 criteria.andEqualTo("id", searchMap.get("id"));
             }
+            // 订单创建时间 createTime    指定日期
+            if (searchMap.get("createTime") != null && !"".equals(searchMap.get("createTime"))) {
+                criteria.andEqualTo("createTime", searchMap.get("createTime"));
+            }
             // 支付类型，1、在线支付、0 货到付款
             if (searchMap.get("payType") != null && !"".equals(searchMap.get("payType"))) {
                 criteria.andLike("payType", "%" + searchMap.get("payType") + "%");
