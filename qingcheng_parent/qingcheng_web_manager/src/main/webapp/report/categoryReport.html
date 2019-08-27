@@ -20,6 +20,9 @@
 <script src="/js/axios.js"></script>
 <script src="/js/elementui.js"></script>
 
+<!-- 引入 echarts -->
+<script src="/js/echarts.common.min.js"></script>
+
 <!--页面展示-->
 <div id="app">
     <!--日期时间选择器  begin-->
@@ -35,6 +38,9 @@
     >
     </el-date-picker>
     <!--日期时间选择器  end-->
+
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 600px;height:400px;"></div>
 
     <!--表格数据  begin-->
     <el-table
@@ -60,6 +66,7 @@
             </template>
         </el-table-column>
         <el-table-column
+                prop="money"
                 label="销售金额(元)"
                 width="180">
             <template slot-scope="scope">
@@ -95,6 +102,7 @@
         },
         methods: {
             fetchData() {
+                //----------------------------销售数据统计----------------------------------
                 let dateBegin = this.dateRange[0].Format("yyyy-MM-dd");//统计开始日期
                 let dateEnd = this.dateRange[1].Format("yyyy-MM-dd");//统计结束日期
                 axios.get(`/categoryReport/category1Count.do?dateBegin=${dateBegin}&dateEnd=${dateEnd}`).then(resp => {
@@ -107,6 +115,81 @@
                         this.totalNum += this.tableData[i].num;//this.tableData[i] 表格记录，索引为i的那条记录（一个对象）
                         this.totalMoney += this.tableData[i].money;
                     }
+
+                    //-----------------------------统计图--------------------------------------
+                    // 准备统计数据
+                    //图例数据
+                    let legendData = [];
+                    //销售数量
+                    let saleNumData = [];
+                    //销售金额
+                    let saleMoneyData = [];
+                    for (let i = 0; i < this.tableData.length; i++) {
+                        //data: ['图书、音像、电子书刊dd', '家用电器']
+                        legendData.push(this.tableData[i].name);
+                        // [{value: 335, name: '图书、音像、电子书刊dd'},{}...]
+                        saleNumData.push({value: this.tableData[i].num, name: this.tableData[i].name});
+                        saleMoneyData.push({value: this.tableData[i].money, name: this.tableData[i].name});
+
+
+                    }
+
+                    // 基于准备好的dom，初始化echarts实例
+                    let myChart = echarts.init(document.getElementById('main'));
+
+                    // 指定图表的配置项和数据
+                    let option = {
+                        title: {
+                            text: '一级分类商品销售统计',
+                            //subtext: '纯属虚构',
+                            x: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: "{a} <br/>{b} : {c} ({d}%)"
+                        },
+                        legend: {
+                            // orient: 'vertical',
+                            // top: 'middle',
+                            bottom: 10,
+                            left: 'center',
+                            //data: ['图书、音像、电子书刊dd', '家用电器']
+                            data: legendData
+                        },
+                        series: [
+                            {
+                                name: '销售数量',
+                                type: 'pie',
+                                radius: '30%',
+                                center: ['25%', '50%'],
+                                data: saleNumData,
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            },
+                            {
+                                name: '销售额',
+                                type: 'pie',
+                                radius: '30%',
+                                center: ['80%', '50%'],
+                                data: saleMoneyData,
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
                 });
             }
         }
