@@ -127,4 +127,20 @@ public class TradeReportServiceImpl implements TradeReportService {
         // 2.添加统计结果到数据库
         tradeReportMapper.insert(tradeReport);
     }
+
+    public List<TradeReport> findAll(){
+        return tradeReportMapper.selectAll();
+    }
+
+    /**
+     * 按日期段查询交易统计数据
+     *
+     * @param dateBegin 开始日期
+     * @param dateEnd   结束日期
+     * @return
+     */
+    @Override
+    public List<Map> findByDateRange(String dateBegin, String dateEnd) {
+        return tradeReportMapper.findByDateRange(dateBegin, dateEnd);
+    }
 }
