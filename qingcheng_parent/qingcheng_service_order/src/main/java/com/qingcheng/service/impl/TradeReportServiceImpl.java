@@ -141,6 +141,7 @@ public class TradeReportServiceImpl implements TradeReportService {
      */
     @Override
     public List<Map> findByDateRange(String dateBegin, String dateEnd) {
-        return tradeReportMapper.findByDateRange(dateBegin, dateEnd);
+        List<Map> mapList = tradeReportMapper.findByDateRange(dateBegin, dateEnd);
+        return mapList;
     }
 }

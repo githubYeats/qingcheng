@@ -28,6 +28,8 @@
         <module>qingcheng_service_sms</module>
         <module>qingcheng_common_web_cas</module>
         <module>qingcheng_web_usercenter</module>
+        <module>qingcheng_service_page</module>
+        <module>qingcheng_service_index</module>
     </modules>
 
     <!--父工程打包类型，必须是pom-->

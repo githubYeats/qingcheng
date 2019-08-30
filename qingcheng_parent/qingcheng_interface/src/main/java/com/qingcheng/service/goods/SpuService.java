@@ -79,7 +79,4 @@ public interface SpuService {
      * @return
      */
     public int pullMany(String[] ids);
-
-
-
 }

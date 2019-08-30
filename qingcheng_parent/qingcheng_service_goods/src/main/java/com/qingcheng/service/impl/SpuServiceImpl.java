@@ -13,6 +13,7 @@ import com.qingcheng.pojo.goods.*;
 import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.goods.SpuService;
 import com.qingcheng.util.IdWorker;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,24 @@ public class SpuServiceImpl implements SpuService {
 
     @Autowired
     private SpuMapper spuMapper;
+
+    @Autowired
+    private SkuMapper skuMapper;
+
+    @Autowired
+    private IdWorker idWorker;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
+
+    @Autowired
+    private CategoryBrandMapper categoryBrandMapper;
+
+    @Autowired
+    private SkuService skuService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 返回全部记录
@@ -233,21 +252,6 @@ public class SpuServiceImpl implements SpuService {
         return example;
     }
 
-    @Autowired
-    private SkuMapper skuMapper;
-
-    @Autowired
-    private IdWorker idWorker;
-
-    @Autowired
-    private CategoryMapper categoryMapper;
-
-    @Autowired
-    private CategoryBrandMapper categoryBrandMapper;
-
-    @Autowired
-    private SkuService skuService;
-
     /**
      * 新增商品。  会保存一个spu信息，与多个sku信息。      引入“分页式ID”：雪花算法
      *
@@ -394,6 +398,7 @@ public class SpuServiceImpl implements SpuService {
         Spu spu = spuMapper.selectByPrimaryKey(id); // 获取当前要修改的Spu对象
         spu.setStatus(status);
         spuMapper.updateByPrimaryKey(spu);*/
+
         Spu spu = new Spu();
         spu.setId(id);
         spu.setStatus(status);
@@ -406,6 +411,31 @@ public class SpuServiceImpl implements SpuService {
         // 2. 商品审核记录
 
         // 3. 审核日志功能
+    }
+
+     /**
+     * 商品上架
+     *
+     * @param id spuId
+     */
+    @Override
+    public void put(String id) {
+        Spu spu = spuMapper.selectByPrimaryKey(id);
+
+        // 只有审核通过的商品才能上架
+        String status = spu.getStatus();
+        if (!status.equals("1")) {// status=1，审核通过
+            throw new RuntimeException("此商品未通过审核！");
+        }
+        spu.setIsMarketable("1");
+        spuMapper.updateByPrimaryKeySelective(spu);
+
+        // 发送消息给RabbitMQ中的商品上架交换器Exchange
+        rabbitTemplate.convertAndSend("exchange.goods.push", "", id);
+
+
+        // 商品日志记录   未完
+
     }
 
     /**
@@ -422,28 +452,10 @@ public class SpuServiceImpl implements SpuService {
         spu.setIsMarketable("0");//商品下架
         spuMapper.updateByPrimaryKeySelective(spu);
 
+        // 发送消息给RabbitMQ中的商品下架交换器Exchange
+        rabbitTemplate.convertAndSend("exchange.goods.pull", "", id);
+
         // 商品日志     未完
-    }
-
-    /**
-     * 商品上架
-     *
-     * @param id spuId
-     */
-    @Override
-    public void put(String id) {
-        Spu spu = spuMapper.selectByPrimaryKey("id");
-
-        // 只有审核通过的商品才能上架
-        String status = spu.getStatus();
-        if (!status.equals("1")) {// status=1，审核通过
-            throw new RuntimeException("此商品未通过审核！");
-        }
-        spu.setIsMarketable("1");
-        spuMapper.updateByPrimaryKeySelective(spu);
-
-        // 商品日志记录   未完
-
     }
 
     /**
@@ -467,7 +479,13 @@ public class SpuServiceImpl implements SpuService {
         // 批量更新数据库
         int count = spuMapper.updateByExampleSelective(spu, example);// 更新的记录条数，要给前端返回信息
 
-        // 记录商品日志
+        // 发送消息给RabbitMQ中的商品上架交换器Exchange
+        rabbitTemplate.convertAndSend("exchange.goods.push", "", ids);
+        //rabbitTemplate.stop();
+
+        // 记录商品日志   待完成
+
+
         return count;
     }
 
@@ -490,10 +508,12 @@ public class SpuServiceImpl implements SpuService {
         // 批量更新数据库记录
         int count = spuMapper.updateByExampleSelective(spu, example);//记录更新记录条数
 
-        // 记录商品日志   未完
+        // 发送消息给RabbitMQ中的商品下架交换器Exchange
+        rabbitTemplate.convertAndSend("exchange.goods.pull", "", ids);
+
+        // 记录商品日志   待完成
 
         return count;
-
     }
 
 
