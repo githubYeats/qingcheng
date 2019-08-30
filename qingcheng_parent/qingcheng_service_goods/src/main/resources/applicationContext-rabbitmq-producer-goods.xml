@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+        ">
+
+    <!--连接工厂-->
+    <rabbit:connection-factory id="connectionFactory" host="127.0.0.1" port="5672" username="guest" password="guest"/>
+
+    <!--创建RabbitMQ模板-->
+    <rabbit:template id="rabbitTemplate" connection-factory="connectionFactory"/>
+
+    <!--======================配置队列、交换器及绑定关系  begin===========================-->
+    <!--封装管理操作-->
+    <rabbit:admin id="rabbitAdmin" connection-factory="connectionFactory"/>
+    <!--创建队列-->
+    <rabbit:queue name="queue.page.create"/><!--商品详细页生成队列-->
+    <rabbit:queue name="queue.page.delete"/><!--商品详细页删除队列-->
+    <rabbit:queue name="queue.index.add"/><!--elasticsearch索引数据新增队列-->
+    <rabbit:queue name="queue.index.delete"/><!--elasticsearch索引数据删除队列-->
+    <!--创建交换器并绑定队列-->
+    <!--商品上架交换器-->
+    <rabbit:fanout-exchange name="exchange.goods.push">
+        <rabbit:bindings>
+            <rabbit:binding queue="queue.page.create"/>
+            <rabbit:binding queue="queue.index.add"/>
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+    <!--商品下架交换器-->
+    <rabbit:fanout-exchange name="exchange.goods.pull">
+        <rabbit:bindings>
+            <rabbit:binding queue="queue.page.delete"/>
+            <rabbit:binding queue="queue.index.delete"/>
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+    <!--======================配置队列、交换器及绑定关系  end===========================-->
+
+</beans>

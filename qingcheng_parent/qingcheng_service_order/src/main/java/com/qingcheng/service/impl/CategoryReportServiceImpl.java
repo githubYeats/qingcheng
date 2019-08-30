@@ -41,7 +41,7 @@ public class CategoryReportServiceImpl implements CategoryReportService {
     public void createData() {
         // 1.销售统计
         //LocalDate date = LocalDate.now().minusDays(1);
-        LocalDate date = LocalDate.of(2019,8,12);
+        LocalDate date = LocalDate.of(2019, 8, 12);
         List<CategoryReport> categoryReportList = categoryReportMapper.categoryReport(date);
 
         for (CategoryReport categoryReport : categoryReportList) {
@@ -52,6 +52,7 @@ public class CategoryReportServiceImpl implements CategoryReportService {
 
     /**
      * 1级分类商品指定时间段的销售统计
+     *
      * @param dateBegin 查询开始日期      左闭
      * @param dateEnd   查询结束日期      右闭
      * @return

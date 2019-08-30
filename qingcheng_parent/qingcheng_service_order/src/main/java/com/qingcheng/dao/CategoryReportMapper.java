@@ -22,10 +22,10 @@ public interface CategoryReportMapper extends Mapper<CategoryReport> {
      * @param date
      * @return
      */
-    @Select("SELECT category_id1 categoryId1, category_id2 categoryId2, category_id3 categoryId3, Date_format ( t1.pay_time, '%Y-%m-%d' ) countDate, sum( t2.num ) num,sum( t2.pay_money ) money " +
+    @Select("SELECT category_id1 categoryId1, category_id2 categoryId2, category_id3 categoryId3, Date_format (t1.pay_time, '%Y-%m-%d') countDate, sum(t2.num) num,sum(t2.pay_money) money " +
             "FROM tb_order t1, tb_order_item t2 " +
-            "WHERE t1.id = t2.order_id  AND t1.pay_status = '1'  AND t1.is_delete = '0'  AND Date_format ( t1.pay_time, '%Y-%m-%d' ) = #{date} " +
-            "GROUP BY category_id1, category_id2, category_id3, Date_format ( t1.pay_time, '%Y-%m-%d' );")
+            "WHERE t1.id = t2.order_id  AND t1.pay_status = '1'  AND t1.is_delete = '0'  AND Date_format (t1.pay_time, '%Y-%m-%d') = #{date} " +
+            "GROUP BY category_id1, category_id2, category_id3, Date_format (t1.pay_time, '%Y-%m-%d');")
     public List<CategoryReport> categoryReport(@Param("date") LocalDate date);
 
     /**
