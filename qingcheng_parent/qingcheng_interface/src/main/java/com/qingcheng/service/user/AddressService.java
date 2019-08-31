@@ -1,4 +1,5 @@
 package com.qingcheng.service.user;
+
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.user.Address;
 
@@ -16,10 +17,10 @@ public interface AddressService {
     public PageResult<Address> findPage(int page, int size);
 
 
-    public List<Address> findList(Map<String,Object> searchMap);
+    public List<Address> findList(Map<String, Object> searchMap);
 
 
-    public PageResult<Address> findPage(Map<String,Object> searchMap,int page, int size);
+    public PageResult<Address> findPage(Map<String, Object> searchMap, int page, int size);
 
 
     public Address findById(Integer id);
@@ -32,4 +33,11 @@ public interface AddressService {
 
     public void delete(Integer id);
 
+    /**
+     * 查询指定用户的收件人地址信息
+     *
+     * @param username
+     * @return
+     */
+    public List<Address> findByUsername(String username);
 }

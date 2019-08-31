@@ -9,6 +9,7 @@ import com.qingcheng.dao.SkuMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
 import com.qingcheng.service.goods.SkuService;
+import com.qingcheng.service.goods.SpecService;
 import com.qingcheng.util.CacheKey;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.bulk.BulkRequest;

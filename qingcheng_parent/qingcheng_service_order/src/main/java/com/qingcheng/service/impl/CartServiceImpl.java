@@ -243,6 +243,7 @@ public class CartServiceImpl implements CartService {
 
     /**
      * 计算用户购物车的优惠金额
+     *
      * @param username
      * @return
      */
@@ -269,5 +270,36 @@ public class CartServiceImpl implements CartService {
             allPreMoney += preMoney;
         }
         return allPreMoney;
+    }
+
+    /**
+     * 刷新购物车商品价格
+     * 在下单前，重新刷新商品价格
+     *
+     * @param username 用户名
+     * @return 购物车列表信息
+     */
+    @Override
+    public List<Map<String, Object>> refreshCart(String username) {
+        List<Map<String, Object>> cart = findCart(username);
+         /*
+        用户购物车中的每一个订单项，封装成一个Map  叫cartItem
+            key         value
+            orderItem   OrderItem对象
+            checked     false | true
+         */
+        // 从数据库查询最新价格并更新购物车
+        for (Map<String, Object> map : cart) {
+            OrderItem orderItem = (OrderItem) map.get("orderItem");
+            Integer newPrice = skuService.findById(orderItem.getSkuId()).getPrice();
+            if (null != newPrice) {
+                orderItem.setPrice(newPrice);//单价
+                orderItem.setMoney(newPrice * orderItem.getNum());//总价
+            }
+        }
+        // 更新缓存
+        redisTemplate.boundHashOps(CacheKey.CART_LIST).put(username, cart);
+        // 返回
+        return cart;
     }
 }
