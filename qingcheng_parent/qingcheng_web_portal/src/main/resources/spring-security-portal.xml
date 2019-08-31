@@ -12,4 +12,7 @@
     <http pattern="/index.do" security="none"/>
     <http pattern="/search.do" security="none"/>
 
+    <!--微信支付回调地址放行-->
+    <http pattern="/wxPay/notify.do" security="none"/>
+
 </beans:beans>

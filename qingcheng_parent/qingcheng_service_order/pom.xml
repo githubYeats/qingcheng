@@ -26,6 +26,13 @@
             <artifactId>qingcheng_common_service</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--微信支付-->
+        <dependency>
+            <groupId>com.github.wxpay</groupId>
+            <artifactId>wxpay-sdk</artifactId>
+            <version>3.0.9</version>
+        </dependency>
     </dependencies>
 
     <!--项目构建  begin-->
