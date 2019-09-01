@@ -30,7 +30,7 @@ public interface OrderService {
      * 保存订单
      *
      * @param order
-     * @return 返回订单号，订单金额
+     * @return 返回订单号，支付金额
      */
     //public void add(Order order);
     public Map<String, Object> add(Order order);

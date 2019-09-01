@@ -118,8 +118,8 @@
                     </div>
                     <div class="step-cont">
                         <ul class="payType">
-                            <li class="selected">在线支付<span title="点击取消选择"></span></li>
-                            <li>货到付款<span title="点击取消选择"></span></li>
+                            <li class="selected" @click="order.payType='1'">在线支付<span title="点击取消选择"></span></li>
+                            <li @click="order.payType='0'">货到付款<span title="点击取消选择"></span></li>
                         </ul>
                     </div>
                     <div class="hr"></div>
@@ -178,7 +178,8 @@
 
                                 <div class="buyMessage">
                                     <span>买家留言：</span>
-                                    <textarea placeholder="建议留言前先与商家沟通确认" class="remarks-cont"></textarea>
+                                    <textarea v-model="order.buyerMessage" placeholder="建议留言前先与商家沟通确认"
+                                              class="remarks-cont"></textarea>
                                 </div>
                             </li>
                             <li></li>
@@ -235,7 +236,7 @@
             </div>
         </div>
         <div class="submit">
-            <a class="sui-btn btn-danger btn-xlarge" href="pay.html">提交订单</a>
+            <a class="sui-btn btn-danger btn-xlarge" @click="saveOrder()">提交订单</a>
         </div>
     </div>
     <!-- 底部栏位 -->
@@ -417,6 +418,11 @@
                     receiverContact: "", // 收件人
                     receiverAddress: "", // 收件人地址
                     receiverMobile: "", //收件人手机号
+
+                    //支付类型     0：货到付款；1：在线支付
+                    // 需要给默认值，否则在页面上必须点击，不点击那它就是null
+                    payType: "1",
+                    buyerMessage: "", //买家留言
                 },
             }
         },
@@ -470,6 +476,24 @@
                 this.order.receiverContact = address.contact;
                 this.order.receiverAddress = address.address;
                 this.order.receiverMobile = address.phone;
+            },
+            // 保存订单，返回订单号与金额
+            saveOrder() {
+                axios.post(`/cart/saveOrder.do`, this.order).then(response => {
+                    // 如果响应数据有订单号，则跳转到支付页面
+                    if (null != response.data.orderId) {
+                        // 判断支付类型
+                        if (this.order.payType == "1") {//在线支付，跳转到支付页面
+                            location.href = `pay.html?orderId=${response.data.orderId}&payMoney=${response.data.payMoney}`
+                        } else {
+                            // 货到付款，跳转到下单成功页面
+                            location.href = `order-success.html?orderId=${response.data.orderId}&payMoney=${response.data.payMoney}`
+                        }
+                    } else {
+                        // 跳转到下单失败页面
+                        location.href = `order-fail.html`;
+                    }
+                });
             }
 
         }

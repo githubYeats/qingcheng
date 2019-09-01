@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service(interfaceClass = SkuService.class)
 public class SkuServiceImpl implements SkuService {
 
     @Autowired
@@ -319,6 +320,7 @@ public class SkuServiceImpl implements SkuService {
      * @return
      */
     @Override
+    @Transactional
     public boolean deductStock(List<OrderItem> orderItemList) {
         // 检查是否可以扣减
         boolean isDeductable = true;//默认可以扣减

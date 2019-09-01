@@ -22,6 +22,6 @@ public interface SkuMapper extends Mapper<Sku> {
      * @param skuId
      * @param num   增加量
      */
-    @Update("update tb_sku set saleNum=saleNum-#{num} where id=#{id}")
+    @Update("update tb_sku set sale_num=sale_num-#{num} where id=#{id}")
     public void addSaleNum(@Param("id") String skuId, @Param("num") Integer num);
 }

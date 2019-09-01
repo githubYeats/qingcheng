@@ -1,5 +1,6 @@
 package com.qingcheng.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -9,16 +10,22 @@ import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.pojo.order.OrderItemOrder;
+import com.qingcheng.service.goods.SkuService;
+import com.qingcheng.service.order.CartService;
+import com.qingcheng.service.order.OrderItemService;
 import com.qingcheng.service.order.OrderService;
 import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.persistence.Id;
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Service
+@Service(interfaceClass = OrderService.class)
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -85,13 +92,90 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectByPrimaryKey(id);
     }
 
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderItemService orderItemService;
+
+    @Reference //dubbo注解
+    private SkuService skuService;
+
     /**
-     * 新增
+     * 新增订单
      *
      * @param order
+     * @return 返回订单号与支付金额
      */
-    public void add(Order order) {
+    @Transactional
+    public Map<String, Object> add(Order order) {
+        // 1.刷新购物车商品价格
+        String username = order.getUsername();
+        List<Map<String, Object>> cart = cartService.refreshCart(username);
+
+        // 2.获取选中的购物车商品
+        List<OrderItem> orderItemList = cart.stream()
+                .filter(cartItem -> (boolean) cartItem.get("checked"))
+                .map(cartItem -> (OrderItem) cartItem.get("orderItem"))
+                .collect(Collectors.toList());
+
+        // 3.扣减库存
+        boolean isDeductable = skuService.deductStock(orderItemList);
+        if (!isDeductable) {
+            throw new RuntimeException("库存扣减失败");
+        }
+
+        // 4.保存订单主表  order对象
+        // id		 	订单ID
+        order.setId(String.valueOf(idWorker.nextId()));
+        // total_num		数量合计
+        order.setTotalNum(orderItemList.stream().mapToInt(OrderItem::getNum).sum());
+        // total_money		金额合计（分）
+        int totalMoney = orderItemList.stream().mapToInt(OrderItem::getMoney).sum();
+        order.setTotalMoney(totalMoney);
+        // pre_money		优惠金额（分）
+        int preMoney = cartService.preferential(order.getUsername());
+        order.setPreMoney(preMoney);
+        // post_fee		邮费（分）	int
+        // pay_money		实付金额（分）
+        order.setPayMoney(totalMoney - preMoney);
+        // create_time		订单创建时间
+        order.setCreateTime(new Date());
+        // shipping_name		物流名称
+        // shopping_code		物流单号
+        // order_status		订单状态
+        order.setOrderStatus("0");//待付款
+        // pay_status		支付状态
+        order.setPayStatus("0");//未支付
+        // consign_status		发货状态
+        order.setConsignStatus("0");//未发货
+        // is_delete		是否已删除
+        order.setIsDelete("0");//未删除
+        // 添加到数据库
         orderMapper.insert(order);
+
+        // 5.保存订单明细
+        double proportion = (double) order.getPayMoney() / totalMoney;//打折比例
+        for (OrderItem orderItem : orderItemList) {
+            orderItem.setId(String.valueOf(idWorker.nextId()));
+            orderItem.setOrderId(order.getId());
+            orderItem.setPayMoney((int) (orderItem.getMoney() * proportion));//实付金额
+            // 添加到数据库
+            orderItemMapper.insert(orderItem);
+        }
+
+        // 6. 清除购物中选中的商品
+        cartService.deleteChecked(order.getUsername());
+
+        // 7.封装返回数据: 订单号与支付金额
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("orderId", order.getId());
+        resultMap.put("payMoney", order.getPayMoney());
+
+        return resultMap;
     }
 
     /**
