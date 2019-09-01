@@ -27,7 +27,7 @@ public class SkuTask {
     }
 
 
-    //@Scheduled(cron = "0 0 0/1 * * ?") //每小时执行一次
+     //@Scheduled(cron = "0 0 0/1 * * ?") //每小时执行一次
     @Scheduled(cron = "0 * * * * ?") //每分钟执行一次
     public void doStockRollback() {
         stockRollbackService.stockRollback();
