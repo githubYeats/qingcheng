@@ -2,6 +2,7 @@ package com.qingcheng.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.OrderItemMapper;
@@ -16,6 +17,7 @@ import com.qingcheng.service.order.OrderItemService;
 import com.qingcheng.service.order.OrderService;
 import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +35,26 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderItemService orderItemService;
+
+    @Reference //dubbo注解
+    private SkuService skuService;
+
+    @Autowired
+    private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    String QUEUE_STOCK_ROLLBACK = "queue.skuStockRollback";
 
     /**
      * 返回全部记录
@@ -92,17 +114,6 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectByPrimaryKey(id);
     }
 
-    @Autowired
-    private CartService cartService;
-
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private OrderItemService orderItemService;
-
-    @Reference //dubbo注解
-    private SkuService skuService;
 
     /**
      * 新增订单
@@ -128,44 +139,49 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("库存扣减失败");
         }
 
-        // 4.保存订单主表  order对象
-        // id		 	订单ID
-        order.setId(String.valueOf(idWorker.nextId()));
-        // total_num		数量合计
-        order.setTotalNum(orderItemList.stream().mapToInt(OrderItem::getNum).sum());
-        // total_money		金额合计（分）
-        int totalMoney = orderItemList.stream().mapToInt(OrderItem::getMoney).sum();
-        order.setTotalMoney(totalMoney);
-        // pre_money		优惠金额（分）
-        int preMoney = cartService.preferential(order.getUsername());
-        order.setPreMoney(preMoney);
-        // post_fee		邮费（分）	int
-        // pay_money		实付金额（分）
-        order.setPayMoney(totalMoney - preMoney);
-        // create_time		订单创建时间
-        order.setCreateTime(new Date());
-        // shipping_name		物流名称
-        // shopping_code		物流单号
-        // order_status		订单状态
-        order.setOrderStatus("0");//待付款
-        // pay_status		支付状态
-        order.setPayStatus("0");//未支付
-        // consign_status		发货状态
-        order.setConsignStatus("0");//未发货
-        // is_delete		是否已删除
-        order.setIsDelete("0");//未删除
-        // 添加到数据库
-        orderMapper.insert(order);
-
-        // 5.保存订单明细
-        double proportion = (double) order.getPayMoney() / totalMoney;//打折比例
-        for (OrderItem orderItem : orderItemList) {
-            orderItem.setId(String.valueOf(idWorker.nextId()));
-            orderItem.setOrderId(order.getId());
-            orderItem.setPayMoney((int) (orderItem.getMoney() * proportion));//实付金额
+        try {
+            // 4.保存订单主表  order对象
+            order.setId(String.valueOf(idWorker.nextId())); // id
+            order.setTotalNum(orderItemList.stream().mapToInt(OrderItem::getNum).sum());// total_num
+            // total_money		金额合计（分）
+            int totalMoney = orderItemList.stream().mapToInt(OrderItem::getMoney).sum();
+            order.setTotalMoney(totalMoney);
+            // pre_money		优惠金额（分）
+            int preMoney = cartService.preferential(order.getUsername());
+            order.setPreMoney(preMoney);
+            // post_fee		邮费（分）
+            order.setPayMoney(totalMoney - preMoney); // pay_money  实付金额
+            order.setCreateTime(new Date());// create_time
+            // shipping_name		物流名称
+            // shopping_code		物流单号
+            order.setOrderStatus("0");//order_status    默认待付款
+            order.setPayStatus("0");// pay_status		默认未支付
+            order.setConsignStatus("0");// consign_status	默认未发货
+            order.setIsDelete("0");//is_delete  默认未删除
             // 添加到数据库
-            orderItemMapper.insert(orderItem);
+            orderMapper.insert(order);
+
+            // 5.保存订单明细
+            double proportion = (double) order.getPayMoney() / totalMoney;//打折比例
+            for (OrderItem orderItem : orderItemList) {
+                orderItem.setId(String.valueOf(idWorker.nextId()));
+                orderItem.setOrderId(order.getId());
+                orderItem.setPayMoney((int) (orderItem.getMoney() * proportion));//实付金额
+                // 添加到数据库
+                orderItemMapper.insert(orderItem);
+            }
+
+            /*
+             制造异常，测试下单的分布式事务管理
+             */
+            int x = 1 / 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 发送订单数据给RabbitMQ，必要时执行库存回滚
+            rabbitTemplate.convertAndSend("", QUEUE_STOCK_ROLLBACK, JSON.toJSONString(orderItemList));
+            throw new RuntimeException("订单生成失败！"); //抛出异常，发送消息给RabbitMQ，准备做商品库存回滚
         }
+
 
         // 6. 清除购物中选中的商品
         cartService.deleteChecked(order.getUsername());
@@ -174,7 +190,6 @@ public class OrderServiceImpl implements OrderService {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("orderId", order.getId());
         resultMap.put("payMoney", order.getPayMoney());
-
         return resultMap;
     }
 
@@ -303,9 +318,6 @@ public class OrderServiceImpl implements OrderService {
         }
         return example;
     }
-
-    @Autowired
-    private OrderItemMapper orderItemMapper;
 
     /**
      * 通过订单id查询订单及订单项
