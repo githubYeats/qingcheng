@@ -2,12 +2,14 @@ package com.qingcheng.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.qingcheng.entity.Result;
+import com.qingcheng.pojo.order.Order;
+import com.qingcheng.pojo.user.Address;
 import com.qingcheng.service.order.CartService;
+import com.qingcheng.service.order.OrderService;
+import com.qingcheng.service.user.AddressService;
 import org.apache.http.HttpResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -26,6 +28,9 @@ public class CartController {
 
     @Reference // dubbo注解
     private CartService cartService;
+
+    @Reference // dubbo注解
+    private AddressService addressService;
 
     /**
      * 从Redis中提取用户购物车列表信息
@@ -105,5 +110,43 @@ public class CartController {
         Map map = new HashMap();
         map.put("preferential", preferential);
         return map;
+    }
+
+    /**
+     * 刷新购物车商品价格
+     *
+     * @return
+     */
+    @GetMapping("/refreshCart")
+    public List<Map<String, Object>> refreshCart() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return cartService.refreshCart(username);
+    }
+
+    /**
+     * 查询当前登录用户的收货人地址信息
+     *
+     * @return
+     */
+    @GetMapping("/findAddress")
+    public List<Address> findAddress() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return addressService.findByUsername(username);
+    }
+
+    @Reference
+    private OrderService orderService;
+
+    /**
+     * 保存订单，返回订单号与支付金额
+     *
+     * @param order
+     * @return
+     */
+    @PostMapping("/saveOrder")
+    public Map<String, Object> saveOrder(@RequestBody Order order) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        order.setUsername(username);
+        return orderService.add(order);
     }
 }

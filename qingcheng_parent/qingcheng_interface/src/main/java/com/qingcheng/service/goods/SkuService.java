@@ -2,6 +2,7 @@ package com.qingcheng.service.goods;
 
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
+import com.qingcheng.pojo.order.OrderItem;
 
 import java.io.IOException;
 import java.util.*;
@@ -66,5 +67,13 @@ public interface SkuService {
      * 批量插入数量到elasticsearch
      */
     public void batchInsertData2ES() throws IOException;
+
+    /**
+     * 批量更新订单项对应商品的库存与销售
+     *
+     * @param orderItemList
+     * @return 是否更新成功
+     */
+    public boolean deductStock(List<OrderItem> orderItemList);
 
 }

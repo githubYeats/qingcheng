@@ -8,7 +8,9 @@ import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.SkuMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.Sku;
+import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.service.goods.SkuService;
+import com.qingcheng.service.goods.SpecService;
 import com.qingcheng.util.CacheKey;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
@@ -29,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service(interfaceClass = SkuService.class)
 public class SkuServiceImpl implements SkuService {
 
     @Autowired
@@ -258,6 +261,7 @@ public class SkuServiceImpl implements SkuService {
 
     /**
      * 批量插入数量到elasticsearch
+     *
      * @throws IOException
      */
     @Override
@@ -274,12 +278,12 @@ public class SkuServiceImpl implements SkuService {
         int count = 0;
         for (Sku sku : skuList) {
             // 创建索引结构   public IndexRequest(String index, String type, String id)
-            IndexRequest indexRequest = new IndexRequest("sku", "doc",sku.getId());
+            IndexRequest indexRequest = new IndexRequest("sku", "doc", sku.getId());
             // 创建文档document
             Map skuMap = new HashMap();
             //skuMap.put("id",sku.getId());
-            skuMap.put("spuId",sku.getSpuId());
-            skuMap.put("image",sku.getImage());
+            skuMap.put("spuId", sku.getSpuId());
+            skuMap.put("image", sku.getImage());
             skuMap.put("name", sku.getName());
             skuMap.put("brandName", sku.getBrandName());
             skuMap.put("categoryName", sku.getCategoryName());
@@ -307,5 +311,39 @@ public class SkuServiceImpl implements SkuService {
 
         //----------------------------4.关闭连接------------------------------------
         restHighLevelClient.close();
+    }
+
+    /**
+     * 批量更新商品库存与销售
+     *
+     * @param orderItemList
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean deductStock(List<OrderItem> orderItemList) {
+        // 检查是否可以扣减
+        boolean isDeductable = true;//默认可以扣减
+        for (OrderItem orderItem : orderItemList) {
+            // 获取sku对象
+            Sku sku = findById(orderItem.getSkuId());
+            /*
+            不能扣减的情况：
+                没有此ksu | 商品下回或删除了 | 库存量<用户购买量
+             */
+            if (sku == null || !"1".equals(sku.getStatus()) || sku.getNum() < orderItem.getNum()) {
+                isDeductable = false;
+                break;
+            }
+        }
+        if (isDeductable) {//可以扣减
+            for (OrderItem orderItem : orderItemList) {
+                // 扣减库存
+                skuMapper.stockDeduct(orderItem.getSkuId(), orderItem.getNum());
+                // 增加销量
+                skuMapper.addSaleNum(orderItem.getSkuId(), orderItem.getNum());
+            }
+        }
+        return isDeductable;
     }
 }

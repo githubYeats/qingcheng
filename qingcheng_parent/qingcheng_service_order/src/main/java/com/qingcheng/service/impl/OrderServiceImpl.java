@@ -1,6 +1,8 @@
 package com.qingcheng.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.OrderItemMapper;
@@ -9,16 +11,23 @@ import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.pojo.order.OrderItemOrder;
+import com.qingcheng.service.goods.SkuService;
+import com.qingcheng.service.order.CartService;
+import com.qingcheng.service.order.OrderItemService;
 import com.qingcheng.service.order.OrderService;
 import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.persistence.Id;
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Service
+@Service(interfaceClass = OrderService.class)
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -26,6 +35,26 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderItemService orderItemService;
+
+    @Reference //dubbo注解
+    private SkuService skuService;
+
+    @Autowired
+    private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    String QUEUE_STOCK_ROLLBACK = "queue.skuStockRollback";
 
     /**
      * 返回全部记录
@@ -85,13 +114,83 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectByPrimaryKey(id);
     }
 
+
     /**
-     * 新增
+     * 新增订单
      *
      * @param order
+     * @return 返回订单号与支付金额
      */
-    public void add(Order order) {
-        orderMapper.insert(order);
+    @Transactional
+    public Map<String, Object> add(Order order) {
+        // 1.刷新购物车商品价格
+        String username = order.getUsername();
+        List<Map<String, Object>> cart = cartService.refreshCart(username);
+
+        // 2.获取选中的购物车商品
+        List<OrderItem> orderItemList = cart.stream()
+                .filter(cartItem -> (boolean) cartItem.get("checked"))
+                .map(cartItem -> (OrderItem) cartItem.get("orderItem"))
+                .collect(Collectors.toList());
+
+        // 3.扣减库存
+        boolean isDeductable = skuService.deductStock(orderItemList);
+        if (!isDeductable) {
+            throw new RuntimeException("库存扣减失败");
+        }
+
+        try {
+            // 4.保存订单主表  order对象
+            order.setId(String.valueOf(idWorker.nextId())); // id
+            order.setTotalNum(orderItemList.stream().mapToInt(OrderItem::getNum).sum());// total_num
+            // total_money		金额合计（分）
+            int totalMoney = orderItemList.stream().mapToInt(OrderItem::getMoney).sum();
+            order.setTotalMoney(totalMoney);
+            // pre_money		优惠金额（分）
+            int preMoney = cartService.preferential(order.getUsername());
+            order.setPreMoney(preMoney);
+            // post_fee		邮费（分）
+            order.setPayMoney(totalMoney - preMoney); // pay_money  实付金额
+            order.setCreateTime(new Date());// create_time
+            // shipping_name		物流名称
+            // shopping_code		物流单号
+            order.setOrderStatus("0");//order_status    默认待付款
+            order.setPayStatus("0");// pay_status		默认未支付
+            order.setConsignStatus("0");// consign_status	默认未发货
+            order.setIsDelete("0");//is_delete  默认未删除
+            // 添加到数据库
+            orderMapper.insert(order);
+
+            // 5.保存订单明细
+            double proportion = (double) order.getPayMoney() / totalMoney;//打折比例
+            for (OrderItem orderItem : orderItemList) {
+                orderItem.setId(String.valueOf(idWorker.nextId()));
+                orderItem.setOrderId(order.getId());
+                orderItem.setPayMoney((int) (orderItem.getMoney() * proportion));//实付金额
+                // 添加到数据库
+                orderItemMapper.insert(orderItem);
+            }
+
+            /*
+             制造异常，测试下单的分布式事务管理
+             */
+            int x = 1 / 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 发送订单数据给RabbitMQ，必要时执行库存回滚
+            rabbitTemplate.convertAndSend("", QUEUE_STOCK_ROLLBACK, JSON.toJSONString(orderItemList));
+            throw new RuntimeException("订单生成失败！"); //抛出异常，发送消息给RabbitMQ，准备做商品库存回滚
+        }
+
+
+        // 6. 清除购物中选中的商品
+        cartService.deleteChecked(order.getUsername());
+
+        // 7.封装返回数据: 订单号与支付金额
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("orderId", order.getId());
+        resultMap.put("payMoney", order.getPayMoney());
+        return resultMap;
     }
 
     /**
@@ -219,9 +318,6 @@ public class OrderServiceImpl implements OrderService {
         }
         return example;
     }
-
-    @Autowired
-    private OrderItemMapper orderItemMapper;
 
     /**
      * 通过订单id查询订单及订单项
