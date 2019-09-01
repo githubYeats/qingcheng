@@ -9,7 +9,7 @@
         ">
 
     <!--加载配置文件  在此项目中，不再需要这句配置，因为common工程中已经有加载配置文件，此处再加载就重复了，会导致各种意外的错误-->
-    <!--<context:property-placeholder location="classpath:redis.properties"/>-->
+    <!--<context:property-placeholder location="classpath:redis-common-service.properties"/>-->
 
     <!-- Redis 相关配置 -->
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">

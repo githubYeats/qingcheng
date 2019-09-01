@@ -18,6 +18,8 @@
             <artifactId>qingcheng_common_web</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--cas-->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-cas</artifactId>
