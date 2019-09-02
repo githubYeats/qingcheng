@@ -54,7 +54,7 @@
                 </h4>
                 <span class="fr">
                     <em class="sui-lead">应付金额：</em>
-                    <em class="orange money">￥{{(money/100).toFixed(2)}}</em>元
+                    <em class="orange money">￥{{(payMoney/100).toFixed(2)}}</em>元
                 </span>
                 <div class="clearfix"></div>
             </div>
@@ -222,19 +222,20 @@
 <script src="js/vue.js"></script>
 <script src="js/util.js"></script>
 <script src="js/qrcode.min.js"></script>
+<script src="js/stomp.min.js"></script>
 
 <!--===========-->
 <script>
     new Vue({
-        el: "app",
+        el: "#app",
         data() {
             return {
                 orderId: "", // 订单ID
-                money: 0, //订单金额（分）
+                payMoney: 0, //订单金额（分）
             }
         },
         created() {
-
+            this.createNative();
         },
         methods: {
             /**
@@ -250,7 +251,8 @@
                             {width: 200, height: 200});
                         qrcode.makeCode(response.data.code_url);
                         this.orderId = response.data.out_trade_no;//订单ID
-                        this.money = response.data.total_fee;//标价金额（商品金额）
+                        this.payMoney = response.data.total_fee;//标价金额（商品金额）
+                        payMoney4STOMP = response.data.total_fee; // STOMP插件推送的金额
                     } else {
                         location.href = 'payfail.html';//跳转到错误页
                     }
@@ -258,6 +260,29 @@
             }
         }
     });
+
+    //---------------------RabbitMQ STOMP插件使用-----------------------------
+    // 绑定本机
+    let payMoney4STOMP = 0;
+    var client = Stomp.client('ws://localhost:15674/ws');
+    var on_connect = function (x) {
+        id = client.subscribe("/exchange/wxPayNotify", function (d) {
+            /*
+            d.body：RabbitMQ中传过来的消息，也是订单号
+            getQueryString("orderId"): pay.html跳转到该weixinpay.html页面时，请求URl中传递过来的订单号
+            两者一致，才说明这是服务器推送过来的已支付订单，就可以跳转到支付成功提示页面paysuccess.html了。
+
+            paysuccess.html页面需要提示支付金额，因此还要将实付的金额通过URL传递给它。
+             */
+            if (d.body == getQueryString("orderId")) {
+                location.href = "paysuccess.html?payMoney4STOMP=" + payMoney4STOMP;
+            }
+        });
+    };
+    var on_error = function () {
+        console.log('error');
+    };
+    client.connect('guest-stomp', 'guest', on_connect, on_error, '/');
 </script>
 
 

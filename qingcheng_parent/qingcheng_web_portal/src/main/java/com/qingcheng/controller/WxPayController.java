@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,6 +43,7 @@ public class WxPayController {
         if (order != null) {
             if ("0".equals(order.getPayStatus()) && "0".equals(order.getOrderStatus()) && username.equals(order.getUsername())) {
                 // 生成二维码 ，并调用notifyUrl
+                // public Map createNative(String orderId, Integer money, String notifyUrl)
                 return wxPayService.createNative(orderId, order.getPayMoney(), notifyUrl);
             } else {
                 return null;
@@ -52,10 +54,32 @@ public class WxPayController {
     }
 
     /**
-     * 回调
+     * 回调地址
+     * 支付成功后，微信平台去调用该地址
      */
     @RequestMapping("/notify")
-    public void notifyLogic(HttpServletRequest request) throws IOException {
+    public Map notify(HttpServletRequest request) throws IOException {
         System.out.println("支付成功回调。。。。");
+        // 获取响应数据
+        InputStream inputStream;
+        try {
+            inputStream = request.getInputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, len);
+            }
+            byteArrayOutputStream.close();
+            inputStream.close();
+            String resultXml = new String(byteArrayOutputStream.toByteArray(), "utf-8");
+            System.out.println(resultXml);
+
+            //回调业务逻辑处理：签名验证，更新订单，记录订单日志
+            wxPayService.notifyLogic(resultXml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new HashMap();
     }
 }

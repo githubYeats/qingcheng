@@ -79,4 +79,11 @@ public interface OrderService {
      */
     public void split(List<Map<String, Integer>> maps);
 
+    /**
+     * 更新订单状态，记录订单日志
+     *
+     * @param orderId
+     * @param transactionId
+     */
+    public void updateOrderAndLog(String orderId, String transactionId);
 }

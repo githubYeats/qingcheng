@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class OrderLog implements Serializable{
 
 	@Id
-	private String id;//ID
+	private Integer id;//ID
 
 	private String operater;//操作员
 
@@ -25,13 +25,22 @@ public class OrderLog implements Serializable{
 
 	private String consignStatus;//发货状态
 
+	private String transactionId;//交易流水号
+
 	private String remarks;//备注
 
-	
-	public String getId() {
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	public Integer getId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

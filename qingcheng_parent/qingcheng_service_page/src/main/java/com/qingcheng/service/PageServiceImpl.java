@@ -111,7 +111,6 @@ public class PageServiceImpl implements PageService {
 
             //######################################################################################
 
-
             //--------------------------------以下是改造过程------------------------------------------------------------
             // 获取当前页面展示的sku对应的spu的规格数据
             String specItems = spu.getSpecItems();// json字符串
@@ -191,6 +190,8 @@ public class PageServiceImpl implements PageService {
             try {
                 writer = new PrintWriter(skuPage, "UTF-8");
                 templateEngine.process("item", context, writer);
+
+                writer.close();//生成完页面，关闭流，否则后面在删除页面时，因为页面对象正在被流使用，就无法删除页面。
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {

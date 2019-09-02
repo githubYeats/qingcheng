@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+ Author: Feiyue
+ Date: 2019/9/2 15:16
+ Desc:
+-->
+<head>
+    <meta charset="UTF-8">
+    <title>RabbiMQ STOMP插件发送消息测试</title>
+</head>
+<body>
+<h1>RabbiMQ STOMP插件发送消息测试</h1>
+</body>
+
+
+<!--引入stomp插件-->
+<script src="js/stomp.min.js"></script>
+<script>
+    // 绑定本机
+    var client = Stomp.client('ws://localhost:15674/ws');
+
+    var on_connect = function (x) {
+        /*
+        STOMP客户端订阅消息队列
+        Client.prototype.subscribe = function(destination, callback, headers)
+         */
+        id = client.subscribe("/exchange/wxPayNotify", function (d) {
+            alert(d.body);
+        });
+    };
+    var on_error = function () {
+        console.log('error');
+    };
+    client.connect('guest-stomp', 'guest', on_connect, on_error, '/');
+</script>
+
+</html>

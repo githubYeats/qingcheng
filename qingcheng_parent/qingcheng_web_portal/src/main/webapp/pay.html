@@ -89,7 +89,7 @@
                     请您在提交订单<em class="orange time">4小时</em>之内完成支付，超时订单会自动取消。订单号：<em>{{orderId}}</em>
                 </span>
                     <span class="fr"><em class="sui-lead">应付金额：</em><em
-                            class="orange money">￥{{(money/100).toFixed(2)}}</em></span>
+                            class="orange money">￥{{(payMoney/100).toFixed(2)}}</em></span>
                 </div>
             </div>
 
@@ -311,17 +311,17 @@
 <script src="js/util.js"></script>
 <script>
     new Vue({
-        el: "app",
+        el: "#app",
         data() {
             return {
                 orderId: "", //订单编号
-                money: "", //订单金额
+                payMoney: 0, //订单金额
             }
         },
         created() {
             // 获取订单号与金额
             this.orderId = getQueryString("orderId");
-            this.money = getQueryString("money");
+            this.payMoney = getQueryString("payMoney");
         },
         methods: {
             // “立即支付”动作处理

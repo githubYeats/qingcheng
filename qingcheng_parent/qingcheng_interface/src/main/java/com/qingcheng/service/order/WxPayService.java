@@ -19,4 +19,10 @@ public interface WxPayService {
      */
     public Map createNative(String orderId, Integer money, String notifyUrl) throws Exception;
 
+    /**
+     * 回调业务处理：签名验证，更新订单，记录订单日志
+     * @param xml   支付后响应的xml数据
+     */
+    public void notifyLogic(String xml) throws Exception;
+
 }

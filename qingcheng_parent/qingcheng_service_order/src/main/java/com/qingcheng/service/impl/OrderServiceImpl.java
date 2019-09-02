@@ -6,14 +6,17 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.OrderItemMapper;
+import com.qingcheng.dao.OrderLogMapper;
 import com.qingcheng.dao.OrderMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.pojo.order.OrderItemOrder;
+import com.qingcheng.pojo.order.OrderLog;
 import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.order.CartService;
 import com.qingcheng.service.order.OrderItemService;
+import com.qingcheng.service.order.OrderLogService;
 import com.qingcheng.service.order.OrderService;
 import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
@@ -55,6 +58,9 @@ public class OrderServiceImpl implements OrderService {
     private RabbitTemplate rabbitTemplate;
 
     String QUEUE_STOCK_ROLLBACK = "queue.skuStockRollback";
+
+    @Autowired
+    private OrderLogService orderLogService;
 
     /**
      * 返回全部记录
@@ -174,7 +180,7 @@ public class OrderServiceImpl implements OrderService {
             /*
              制造异常，测试下单的分布式事务管理
              */
-            int x = 1 / 0;
+            //int x = 1 / 0;
         } catch (Exception e) {
             e.printStackTrace();
             // 发送订单数据给RabbitMQ，必要时执行库存回滚
@@ -494,6 +500,39 @@ public class OrderServiceImpl implements OrderService {
                  */
                 // 这是业务要求，得靠业务经验的积累，才能知道具体要修改哪些表，哪些字段
             }
+        }
+    }
+
+    /**
+     * 支付成功，更新订单状态，记录订单日志
+     *
+     * @param orderId
+     * @param transactionId
+     */
+    @Override
+    @Transactional
+    public void updateOrderAndLog(String orderId, String transactionId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order != null && "0".equals(order.getPayStatus())) {
+            // 更新订单
+            order.setPayStatus("1");//已支付
+            order.setUpdateTime(new Date());
+            order.setPayTime(new Date());
+            order.setTransactionId(transactionId);
+            order.setOrderStatus("1");//待发货
+            order.setConsignStatus("0");
+            orderMapper.updateByPrimaryKey(order);
+
+            // 记录订单日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setOperater("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderId(orderId);//订单id
+            orderLog.setOrderStatus("1");//待发货
+            orderLog.setPayStatus("1");//已支付
+            orderLog.setConsignStatus("1");//待发货
+            orderLog.setTransactionId(transactionId);//支付交易流水号
+            orderLogService.add(orderLog);
         }
     }
 }

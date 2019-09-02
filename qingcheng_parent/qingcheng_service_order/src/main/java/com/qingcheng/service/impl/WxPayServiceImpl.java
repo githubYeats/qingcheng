@@ -4,7 +4,9 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.wxpay.sdk.Config;
 import com.github.wxpay.sdk.WXPayRequest;
 import com.github.wxpay.sdk.WXPayUtil;
+import com.qingcheng.service.order.OrderService;
 import com.qingcheng.service.order.WxPayService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -20,6 +22,12 @@ public class WxPayServiceImpl implements WxPayService {
 
     @Autowired
     private Config config;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 生成二维码
@@ -70,4 +78,58 @@ public class WxPayServiceImpl implements WxPayService {
         result.put("out_trade_no", orderId);//订单号
         return result;
     }
+
+    /**
+     * 回调业务处理：签名验证，更新订单状，记录订单日志
+     *
+     * @param xml 支付后响应的xml数据
+     * @return
+     */
+    @Override
+    public void notifyLogic(String xml) throws Exception {
+        // xml-->map    转成map，便于提取字段
+        Map<String, String> map = WXPayUtil.xmlToMap(xml);
+
+        // 签名验证
+        boolean isSignatureValid = WXPayUtil.isSignatureValid(map, config.getKey());
+
+        // 解析xml各字段
+        /*for (String key : map.keySet()) {
+            System.out.println(key + ":" + map.get(key));
+        }*/
+
+        // 解析以下字段
+        /*
+        out_trade_no		订单id号		在对应的商家中，其值是唯一的。
+        sign				签名			支付平台自动添加的签名，用于验证交易的合法性。
+        transaction_id		交易流水号		支付交易，由支付平台返回的交易流水号，在整个支付平台中是唯一的。
+        return_code		    返回状态码		SUCCESS | FAIL   此字段是通信标识，非交易标识，交易是否成功需要查看
+                                            result_code来判断
+        result_code		业务结果		支付结果状态码	SUCCESS | FAIL  SUCCESS表示支付成功
+         */
+        String out_trade_no = map.get("out_trade_no");
+        String sign = map.get("sign");
+        String transaction_id = map.get("transaction_id");
+        String return_code = map.get("return_code");
+        String result_code = map.get("result_code");
+        System.out.println(out_trade_no);
+        System.out.println(sign);
+        System.out.println(transaction_id);
+        System.out.println(return_code);
+        System.out.println(result_code);
+
+        // 更新订单状态，记录订单日志
+            if (isSignatureValid && "SUCCESS".equals(map.get("result_code"))) {
+                orderService.updateOrderAndLog(map.get("out_trade_no"), map.get("transaction_id"));
+
+                // 发送消息给RabbitMQ
+                String orderId = map.get("out_trade_no");
+                rabbitTemplate.convertAndSend("wxPayNotify", "", orderId);
+
+            } else {
+            //记录全局日志
+        }
+    }
+
+
 }
