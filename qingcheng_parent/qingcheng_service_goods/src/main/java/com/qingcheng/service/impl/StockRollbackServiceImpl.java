@@ -46,6 +46,7 @@ public class StockRollbackServiceImpl implements StockRollbackService {
 
     /**
      * 执行库存回滚
+     * 针对下单异常导致的数据不一致
      */
     @Override
     @Transactional // 事务控制

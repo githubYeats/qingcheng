@@ -31,6 +31,13 @@ public class WxPayController {
     @Reference //dubbo注解
     private OrderService orderService;
 
+    /**
+     * 生成支付二维码
+     *
+     * @param orderId
+     * @return
+     * @throws Exception
+     */
     @GetMapping("/createNative")
     public Map createNative(String orderId) throws Exception {
         // 获取当前登录用户名

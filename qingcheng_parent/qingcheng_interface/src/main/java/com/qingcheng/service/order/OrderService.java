@@ -86,4 +86,18 @@ public interface OrderService {
      * @param transactionId
      */
     public void updateOrderAndLog(String orderId, String transactionId);
+
+    /**
+     * 关闭订单的业务处理
+     *
+     * @param orderId
+     */
+    public void closeOrderLogic(String orderId) throws Exception;
+
+    /**
+     * 处理超时未支付订单
+     *
+     * @param orderId
+     */
+    public void orderTimeoutLogic(String orderId) throws Exception;
 }

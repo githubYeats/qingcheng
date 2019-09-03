@@ -14,7 +14,7 @@ import java.util.List;
  * Date: 2019/9/1 17:03
  * Desc: 库存回滚消息消费者
  */
-public class StockRollBackMsgConsumer implements MessageListener {
+public class StockRollbackMsgConsumer implements MessageListener {
 
     @Autowired
     private StockRollbackService stockRollbackService;

@@ -9,14 +9,14 @@
     <!--连接工厂-->
     <rabbit:connection-factory id="connectionFactory" host="127.0.0.1" port="5672" username="guest" password="guest"/>
 
-    <!--创建队列 -->
-    <rabbit:queue name="queue.skuStockRollback"/>
+    <!--配置监听队列 -->
+    <rabbit:queue name="queue.orderTimeout"/>
 
     <!--配置消费者监听类-->
-   <bean id="messageListener" class="com.qingcheng.consumer.StockRollbackMsgConsumer"/>
+    <bean id="messageListener" class="com.qingcheng.consumer.OrderTimeoutMsgConsumer"/>
 
     <!--配置监听容器-->
     <rabbit:listener-container connection-factory="connectionFactory">
-        <rabbit:listener ref="messageListener" queue-names="queue.skuStockRollback"/>
+        <rabbit:listener ref="messageListener" queue-names="queue.orderTimeout"/>
     </rabbit:listener-container>
 </beans>

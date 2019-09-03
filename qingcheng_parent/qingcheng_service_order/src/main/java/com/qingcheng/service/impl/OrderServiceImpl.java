@@ -9,15 +9,13 @@ import com.qingcheng.dao.OrderItemMapper;
 import com.qingcheng.dao.OrderLogMapper;
 import com.qingcheng.dao.OrderMapper;
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.pojo.goods.Sku;
 import com.qingcheng.pojo.order.Order;
 import com.qingcheng.pojo.order.OrderItem;
 import com.qingcheng.pojo.order.OrderItemOrder;
 import com.qingcheng.pojo.order.OrderLog;
 import com.qingcheng.service.goods.SkuService;
-import com.qingcheng.service.order.CartService;
-import com.qingcheng.service.order.OrderItemService;
-import com.qingcheng.service.order.OrderLogService;
-import com.qingcheng.service.order.OrderService;
+import com.qingcheng.service.order.*;
 import com.qingcheng.util.IdWorker;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -57,10 +55,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    String QUEUE_STOCK_ROLLBACK = "queue.skuStockRollback";
-
     @Autowired
     private OrderLogService orderLogService;
+
 
     /**
      * 返回全部记录
@@ -120,6 +117,9 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectByPrimaryKey(id);
     }
 
+    String QUEUE_STOCK_ROLLBACK = "queue.skuStockRollback";
+
+    String QUEUE_ORDER = "queue.order";//带TTL属性的消息队列，RabbitMQ中事先创建的
 
     /**
      * 新增订单
@@ -177,17 +177,22 @@ public class OrderServiceImpl implements OrderService {
                 orderItemMapper.insert(orderItem);
             }
 
+            // 下单成功，发送订单编号给RabbitMQ，用于查询订单支付状态
+            /*
+            QUEUE_ORDER：带TTL属性的消息队列
+             */
+            rabbitTemplate.convertAndSend("", QUEUE_ORDER, order.getId());
+
             /*
              制造异常，测试下单的分布式事务管理
              */
             //int x = 1 / 0;
         } catch (Exception e) {
             e.printStackTrace();
-            // 发送订单数据给RabbitMQ，必要时执行库存回滚
+            // 下单异常，发送订单数据给RabbitMQ，用于库存回滚
             rabbitTemplate.convertAndSend("", QUEUE_STOCK_ROLLBACK, JSON.toJSONString(orderItemList));
             throw new RuntimeException("订单生成失败！"); //抛出异常，发送消息给RabbitMQ，准备做商品库存回滚
         }
-
 
         // 6. 清除购物中选中的商品
         cartService.deleteChecked(order.getUsername());
@@ -533,6 +538,87 @@ public class OrderServiceImpl implements OrderService {
             orderLog.setConsignStatus("1");//待发货
             orderLog.setTransactionId(transactionId);//支付交易流水号
             orderLogService.add(orderLog);
+        }
+    }
+
+    @Autowired
+    private WxPayService wxPayService;
+
+
+    /**
+     * 关闭订单的业务处理
+     * 调用微信支付关闭订单 + 修改本地订单状态 + 记录订单日志 + 库存回滚
+     *
+     * @param orderId
+     */
+    @Override
+    @Transactional //事务控制
+    public void closeOrderLogic(String orderId) throws Exception {
+        //调用微信支付关闭订单接口，关闭支付平台上未支付订单
+        Map resultMap = wxPayService.closeOrder(orderId);
+        //业务结果
+        String result_code = (String) resultMap.get("result_code");
+        if ("SUCCESS".equals(result_code)) {
+            System.out.println("平台订单关闭成功！");
+        } else {
+            System.out.println("平台订单关闭失败！");
+        }
+
+        //修改订单状态
+        Order order = orderService.findById(orderId);
+        order.setIsDelete("1"); //已删除
+        order.setOrderStatus("4"); //已关闭
+        order.setPayStatus("0"); //未支付
+        order.setUpdateTime(new Date());
+        order.setCloseTime(new Date());
+        orderMapper.updateByPrimaryKey(order);
+
+        //库存回滚
+        Map searchMap = new HashMap();
+        searchMap.put("orderId", orderId);
+        List<OrderItem> orderItemList = orderItemService.findList(searchMap);
+        for (OrderItem orderItem : orderItemList) {
+            Sku sku = skuService.findById(orderItem.getSkuId());
+            sku.setNum(sku.getNum() + orderItem.getNum()); //库存数量
+            sku.setSaleNum(sku.getSaleNum() - orderItem.getNum());//销售数量
+            sku.setUpdateTime(new Date());
+            skuService.update(sku);
+
+        }
+
+        //记录订单日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOperater("system");
+        orderLog.setOperateTime(new Date());
+        orderLog.setOrderId(orderId); //订单id
+        orderLog.setOrderStatus("4"); //订单已关闭
+        orderLog.setPayStatus("0"); //未支付
+        orderLog.setConsignStatus("0");
+        orderLogService.add(orderLog);
+    }
+
+    /**
+     * 处理超时未支付订单
+     *
+     * @param orderId
+     */
+    @Transactional
+    public void orderTimeoutLogic(String orderId) throws Exception {
+        // 1.查询本地系统订单状态
+        Order order = orderService.findById(orderId);
+        if (null != order && !"1".equals(order.getIsDelete())) {
+            if ("0".equals(order.getPayStatus())) {// 本地系统订单状态：未支付
+                // 2.查询支付平台中的订单支付状态
+                Map queryResultMap = wxPayService.orderQuery(orderId);
+                String trade_state = (String) queryResultMap.get("trade_state");
+                if ("SUCCESS".equals(trade_state)) {// 支付平台上，订单显示支付成功
+                    // 本地做补偿操作，即更新订单状态
+                    updateOrderAndLog(orderId, (String) queryResultMap.get("transaction_id"));
+                } else {// 支付平台上，订单显示未支付
+                    // 执行关闭订单业务
+                    closeOrderLogic(orderId);
+                }
+            }
         }
     }
 }
