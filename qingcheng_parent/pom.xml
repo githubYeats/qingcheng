@@ -30,6 +30,7 @@
         <module>qingcheng_web_usercenter</module>
         <module>qingcheng_service_page</module>
         <module>qingcheng_service_index</module>
+        <module>qingcheng_service_seckill</module>
     </modules>
 
     <!--父工程打包类型，必须是pom-->
