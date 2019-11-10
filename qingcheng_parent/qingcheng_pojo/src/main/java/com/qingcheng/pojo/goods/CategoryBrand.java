@@ -1,5 +1,7 @@
 package com.qingcheng.pojo.goods;
 
+import lombok.Data;
+
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -10,6 +12,7 @@ import java.io.Serializable;
  * Desc: 对应db_goods库tb_category_brand表      手动创建的该类
  */
 @Table(name = "tb_category_brand") //JPA注解
+@Data
 public class CategoryBrand implements Serializable {
 
     /**
@@ -23,20 +26,4 @@ public class CategoryBrand implements Serializable {
      */
     @Id
     private Integer brandId;
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Integer getBrandId() {
-        return brandId;
-    }
-
-    public void setBrandId(Integer brandId) {
-        this.brandId = brandId;
-    }
 }
