@@ -1,5 +1,7 @@
 package com.qingcheng.util;
 
+import java.util.UUID;
+
 /**
  * Author: Feiyue
  * Date: 2019/8/4 0:24
@@ -13,5 +15,8 @@ public class Demo {
             id = idWorker.nextId();
             System.out.println(id);
         }
+
+        // UUID
+        System.out.println("UUID: " + UUID.randomUUID().toString());
     }
 }

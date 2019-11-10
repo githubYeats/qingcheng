@@ -1,5 +1,7 @@
 package com.qingcheng.entity;
 
+import org.junit.runner.RunWith;
+
 import java.io.Serializable;
 
 /**
