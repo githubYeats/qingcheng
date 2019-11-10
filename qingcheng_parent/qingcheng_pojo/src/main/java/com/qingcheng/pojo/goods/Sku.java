@@ -1,4 +1,6 @@
 package com.qingcheng.pojo.goods;
+import lombok.Data;
+
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -8,6 +10,7 @@ import java.io.Serializable;
  *
  */
 @Table(name="tb_sku")
+@Data
 public class Sku implements Serializable{
 
 	@Id
@@ -50,7 +53,7 @@ public class Sku implements Serializable{
 	private String status;//商品状态 1-正常，2-下架，3-删除
 
 	
-	public String getId() {
+	/*public String getId() {
 		return id;
 	}
 	public void setId(String id) {
@@ -181,7 +184,7 @@ public class Sku implements Serializable{
 	}
 	public void setStatus(String status) {
 		this.status = status;
-	}
+	}*/
 
 
 	
