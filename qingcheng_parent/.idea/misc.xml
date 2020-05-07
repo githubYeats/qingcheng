@@ -4,11 +4,16 @@
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_business" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_config" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_goods" />
+    <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_index" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_order" />
+    <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_page" />
+    <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_seckill" />
+    <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_sms" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_system" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_service_user" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_web_manager" />
     <file type="web" url="file://$PROJECT_DIR$/qingcheng_web_portal" />
+    <file type="web" url="file://$PROJECT_DIR$/qingcheng_web_usercenter" />
   </component>
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
@@ -20,7 +25,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_9" project-jdk-name="9" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_9" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
 </project>
