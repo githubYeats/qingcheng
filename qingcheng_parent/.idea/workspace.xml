@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b402c08f-20cf-4a85-b8ed-d431c5483e6f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_common_web_cas/qingcheng_common_web_cas.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_service_index/qingcheng_service_index.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_service_page/qingcheng_service_page.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_service_seckill/qingcheng_service_seckill.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_service_sms/qingcheng_service_sms.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qingcheng_web_usercenter/qingcheng_web_usercenter.iml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +66,6 @@
     </option>
     <option name="importingSettings">
       <MavenImportingSettings>
-        <option name="importAutomatically" value="true" />
         <option name="jdkForImporter" value="#JAVA_HOME" />
         <option name="useMavenOutput" value="false" />
         <option name="vmOptionsForImporter" value="-Xmx768m" />
@@ -93,11 +85,12 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
@@ -109,7 +102,7 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="File.Encoding" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -335,18 +328,6 @@
       <item itemvalue="Maven.web_portal" />
     </list>
   </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
-  </component>
   <component name="StructureViewFactory">
     <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
   </component>
@@ -382,6 +363,8 @@
       <workItem from="1565790438196" duration="2783000" />
       <workItem from="1565851140142" duration="12835000" />
       <workItem from="1588864326194" duration="2222000" />
+      <workItem from="1603289137861" duration="19000" />
+      <workItem from="1603289164157" duration="43000" />
     </task>
     <task id="LOCAL-00001" summary="修改完各配置文件">
       <created>1564725721340</created>
@@ -517,16 +500,14 @@
     </history-entry>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="2" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -545,6 +526,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="修改完各配置文件" />
@@ -564,22 +546,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="add：README" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="496" y="211" key="#Inspections" timestamp="1588869982884">
-      <screen x="0" y="23" width="1792" height="1045" />
+    <state x="397" y="190" key="SettingsEditor" timestamp="1603289206502">
+      <screen x="0" y="23" width="1792" height="1057" />
     </state>
-    <state x="496" y="211" key="#Inspections/0.23.1792.1045@0.23.1792.1045" timestamp="1588869982884" />
-    <state x="745" y="452" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1588864339705">
-      <screen x="0" y="23" width="1792" height="1045" />
-    </state>
-    <state x="745" y="452" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.23.1792.1045@0.23.1792.1045" timestamp="1588864339705" />
-    <state x="100" y="123" width="1592" height="845" key="DiffContextDialog" timestamp="1588870175170">
-      <screen x="0" y="23" width="1792" height="1045" />
-    </state>
-    <state x="100" y="123" width="1592" height="845" key="DiffContextDialog/0.23.1792.1045@0.23.1792.1045" timestamp="1588870175170" />
-    <state x="469" y="263" key="RollbackChangesDialog" timestamp="1588870011870">
-      <screen x="0" y="23" width="1792" height="1045" />
-    </state>
-    <state x="469" y="263" key="RollbackChangesDialog/0.23.1792.1045@0.23.1792.1045" timestamp="1588870011870" />
+    <state x="397" y="190" key="SettingsEditor/0.23.1792.1057@0.23.1792.1057" timestamp="1603289206502" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
