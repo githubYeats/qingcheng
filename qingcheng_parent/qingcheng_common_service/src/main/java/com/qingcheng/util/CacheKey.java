@@ -1,13 +1,31 @@
 package com.qingcheng.util;
 
+/**
+ * @author fyyang
+ */
 public enum CacheKey {
-    AD, //广告
+    /**
+     * 广告
+     */
+    AD,
 
-    SKU_PRICE, // 商品价格
+    /**
+     * 商品价格
+     */
+    SKU_PRICE,
 
-    CATEGORY_TREE, // 商品分类导航树
+    /**
+     * 商品分类导航树
+     */
+    CATEGORY_TREE,
 
-    CART_LIST, // 购物车
+    /**
+     * 购物车
+     */
+    CART_LIST,
 
-    CATEGORY, // 商品分类
+    /**
+     * 商品分类
+     */
+    CATEGORY,
 }
