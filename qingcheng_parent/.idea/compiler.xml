@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -12,16 +13,16 @@
         <module name="qingcheng_pojo" />
         <module name="qingcheng_interface" />
         <module name="qingcheng_common_web" />
-        <module name="qingcheng_service_page" />
         <module name="qingcheng_common_service" />
         <module name="qingcheng_service_index" />
-        <module name="qingcheng_service_config" />
+        <module name="qingcheng_service_page" />
         <module name="qingcheng_service_user" />
         <module name="qingcheng_web_portal" />
         <module name="qingcheng_service_goods" />
         <module name="qingcheng_web_usercenter" />
         <module name="qingcheng_service_business" />
         <module name="qingcheng_service_order" />
+        <module name="qingcheng_service_config" />
         <module name="qingcheng_common" />
         <module name="qingcheng_service_system" />
         <module name="qingcheng_web_manager" />

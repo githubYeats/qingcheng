@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b402c08f-20cf-4a85-b8ed-d431c5483e6f" name="Default Changelist" comment="">
+    <list default="true" id="b402c08f-20cf-4a85-b8ed-d431c5483e6f" name="Default Changelist" comment="fix">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qingcheng_parent.iml" beforeDir="false" afterPath="$PROJECT_DIR$/qingcheng_parent.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qingcheng_web_manager/qingcheng_web_manager.iml" beforeDir="false" afterPath="$PROJECT_DIR$/qingcheng_web_manager/qingcheng_web_manager.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qingcheng_web_portal/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/qingcheng_web_portal/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,11 +52,33 @@
     </replaceStrings>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$/.." value="dev-SpringDataRedis" />
       </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="v1.1.0" />
+                    <option name="lastUsedInstant" value="1611051775" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$/.." />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
     </option>
   </component>
   <component name="MavenImportPreferences">
@@ -75,11 +101,6 @@
   <component name="MavenRunner">
     <option name="jreName" value="#JAVA_HOME" />
     <option name="vmOptions" value="-DarchetypeCatalog=internal" />
-  </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-10" />
-    <option name="width" value="980" />
-    <option name="height" value="1040" />
   </component>
   <component name="ProjectId" id="1baJZIkdOFxY9GsTYyVZADYqBnS" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -364,7 +385,18 @@
       <workItem from="1565851140142" duration="12835000" />
       <workItem from="1588864326194" duration="2222000" />
       <workItem from="1603289137861" duration="19000" />
-      <workItem from="1603289164157" duration="43000" />
+      <workItem from="1603289164157" duration="1648000" />
+      <workItem from="1603473559503" duration="1277000" />
+      <workItem from="1603703253845" duration="294000" />
+      <workItem from="1603798039316" duration="595000" />
+      <workItem from="1604738331145" duration="20000" />
+      <workItem from="1605166908560" duration="125000" />
+      <workItem from="1609773766106" duration="1189000" />
+      <workItem from="1611051663518" duration="220000" />
+      <workItem from="1613403985449" duration="586000" />
+      <workItem from="1613725409302" duration="340000" />
+      <workItem from="1613978989952" duration="428000" />
+      <workItem from="1617720327566" duration="3196000" />
     </task>
     <task id="LOCAL-00001" summary="修改完各配置文件">
       <created>1564725721340</created>
@@ -464,7 +496,28 @@
       <option name="project" value="LOCAL" />
       <updated>1565791933565</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="fix">
+      <created>1603289240435</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1603289240435</updated>
+    </task>
+    <task id="LOCAL-00016" summary="fix">
+      <created>1611051842128</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1611051842128</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fix">
+      <created>1611051877085</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1611051877085</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -543,13 +596,46 @@
     <MESSAGE value="add：day06-统计分析功能（做到Echart图表插件）" />
     <MESSAGE value="add：day09: 模板渲染解决方法-Thymeleaf   完成" />
     <MESSAGE value="add：README" />
-    <option name="LAST_COMMIT_MESSAGE" value="add：README" />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="397" y="190" key="SettingsEditor" timestamp="1603289206502">
-      <screen x="0" y="23" width="1792" height="1057" />
+    <state x="384" y="127" key="#Project_Structure" timestamp="1613725416821">
+      <screen x="0" y="25" width="1792" height="1048" />
     </state>
-    <state x="397" y="190" key="SettingsEditor/0.23.1792.1057@0.23.1792.1057" timestamp="1603289206502" />
+    <state x="384" y="127" key="#Project_Structure/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1613725416821" />
+    <state x="329" y="123" key="CommitChangelistDialog2" timestamp="1611051881762">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="329" y="123" key="CommitChangelistDialog2/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1611051881762" />
+    <state x="179" y="119" key="DiffContextDialog" timestamp="1611051855352">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="179" y="119" key="DiffContextDialog/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1611051855352" />
+    <state x="179" y="119" key="DiffContextDialog/0.25.1792.1048@0.25.1792.1048" timestamp="1609773908173" />
+    <state width="201" height="355" key="Git.Branch.Popup" timestamp="1613979384301">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state width="201" height="355" key="Git.Branch.Popup/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1613979384301" />
+    <state width="201" height="355" key="Git.Branch.Popup/0.25.1792.1048@0.25.1792.1048" timestamp="1613403991343" />
+    <state x="397" y="191" key="SettingsEditor" timestamp="1609773784739">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="397" y="191" key="SettingsEditor/0.25.1792.1048@0.25.1792.1048" timestamp="1609773784739" />
+    <state x="496" y="286" key="Vcs.Push.Dialog.v2" timestamp="1613403993505">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="496" y="286" key="Vcs.Push.Dialog.v2/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1611051676716" />
+    <state x="496" y="286" key="Vcs.Push.Dialog.v2/0.25.1792.1048@0.25.1792.1048" timestamp="1613403993505" />
+    <state x="687" y="467" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1613531931109">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="687" y="467" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1611051726428" />
+    <state x="687" y="467" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.25.1792.1048@0.25.1792.1048" timestamp="1613531931109" />
+    <state x="687" y="442" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1611051693345">
+      <screen x="0" y="25" width="1792" height="1048" />
+    </state>
+    <state x="687" y="442" key="git4idea.remote.GitConfigureRemotesDialog/0.25.1792.1048/1792.-143.1920.1055@0.25.1792.1048" timestamp="1611051693345" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -570,90 +656,5 @@
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ArtifactsStructureConfigurable.UI">
-        <settings>
-          <artifact-editor />
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="FacetStructureConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="GlobalLibrariesConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="JdkListConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ModuleStructureConfigurable.UI">
-        <settings>
-          <last-edited>qingcheng_web_portal</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-                <option value="0.6" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ProjectJDKs.UI">
-        <settings>
-          <last-edited>1.8.0_144</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ProjectLibrariesConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
   </component>
 </project>

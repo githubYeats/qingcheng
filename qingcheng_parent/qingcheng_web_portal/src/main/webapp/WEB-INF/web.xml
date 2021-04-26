@@ -28,6 +28,7 @@
         <param-value>classpath*:spring-security*.xml</param-value>
     </context-param>
     <listener>
+        <!--ContextLoaderListener是用于在Web容器中建立Spring IoC容器。-->
         <listener-class>
             org.springframework.web.context.ContextLoaderListener
         </listener-class>
